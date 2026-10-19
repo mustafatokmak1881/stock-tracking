@@ -829,19 +829,8 @@ async function loadReport() {
 
 window.exportCsv = async function() {
   try {
-    const products = await invoke('list_products', { search: null });
-    const header = 'id,barcode,sku,name,unit,buy_price,sell_price,min_stock_level,current_stock\n';
-    const rows = products.map(p =>
-      [p.id, p.barcode||'', p.sku||'', `"${p.name}"`, p.unit, p.buy_price, p.sell_price, p.min_stock_level, p.current_stock].join(',')
-    ).join('\n');
-    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'stok-urunler.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast('CSV indirildi');
+    const path = await invoke('export_products_csv');
+    toast('CSV kaydedildi: ' + path);
   } catch (e) {
     toast(String(e), 'error');
   }

@@ -123,6 +123,8 @@ pub enum AppError {
     NotFound,
     #[error("Yetersiz stok")]
     InsufficientStock,
+    #[error("{0}")]
+    Other(String),
 }
 
 impl Serialize for AppError {
@@ -132,6 +134,21 @@ impl Serialize for AppError {
     {
         serializer.serialize_str(&self.to_string())
     }
+}
+
+fn map_product(row: &rusqlite::Row) -> rusqlite::Result<Product> {
+    Ok(Product {
+        id: row.get(0)?,
+        sku: row.get(1)?,
+        barcode: row.get(2)?,
+        name: row.get(3)?,
+        category_id: row.get(4)?,
+        unit: row.get(5)?,
+        buy_price: row.get(6)?,
+        sell_price: row.get(7)?,
+        min_stock_level: row.get(8)?,
+        current_stock: row.get(9)?,
+    })
 }
 
 #[tauri::command]
@@ -162,21 +179,6 @@ fn list_products(search: Option<String>) -> Result<Vec<Product>, AppError> {
         stmt.query_map(params![params_vec[0]], map_product)?
     };
     Ok(rows.filter_map(|r| r.ok()).collect())
-}
-
-fn map_product(row: &rusqlite::Row) -> rusqlite::Result<Product> {
-    Ok(Product {
-        id: row.get(0)?,
-        sku: row.get(1)?,
-        barcode: row.get(2)?,
-        name: row.get(3)?,
-        category_id: row.get(4)?,
-        unit: row.get(5)?,
-        buy_price: row.get(6)?,
-        sell_price: row.get(7)?,
-        min_stock_level: row.get(8)?,
-        current_stock: row.get(9)?,
-    })
 }
 
 #[tauri::command]
@@ -372,6 +374,58 @@ fn stock_value_report() -> Result<StockValueReport, AppError> {
     })
 }
 
+#[tauri::command]
+fn export_products_csv() -> Result<String, AppError> {
+    use std::fs;
+    use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    let conn = DB.lock().unwrap();
+    let mut stmt = conn.prepare(
+        "SELECT id, sku, barcode, name, unit, buy_price, sell_price, min_stock_level, current_stock FROM products ORDER BY name"
+    )?;
+
+    let mut csv = String::from("id,sku,barcode,name,unit,buy_price,sell_price,min_stock_level,current_stock\n");
+
+    let rows = stmt.query_map([], |row| {
+        Ok((
+            row.get::<_, i64>(0)?,
+            row.get::<_, Option<String>>(1)?.unwrap_or_default(),
+            row.get::<_, Option<String>>(2)?.unwrap_or_default(),
+            row.get::<_, String>(3)?,
+            row.get::<_, String>(4)?,
+            row.get::<_, f64>(5)?,
+            row.get::<_, f64>(6)?,
+            row.get::<_, f64>(7)?,
+            row.get::<_, f64>(8)?,
+        ))
+    })?;
+
+    for row in rows {
+        let (id, sku, barcode, name, unit, buy, sell, min_s, stock) = row?;
+        let safe_name = name.replace('"', "'");
+        csv.push_str(&format!(
+            "{},{},{},\"{}\",{},{},{},{},{}\n",
+            id, sku, barcode, safe_name, unit, buy, sell, min_s, stock
+        ));
+    }
+
+    let mut dir = PathBuf::from("exports");
+    fs::create_dir_all(&dir).map_err(|e| AppError::Other(format!("Klasor olusturulamadi: {}", e)))?;
+
+    let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
+    let filename = format!("stok-urunler-{}.csv", ts);
+    dir.push(&filename);
+
+    // UTF-8 BOM so Excel opens Turkish characters correctly
+    let mut bytes = vec![0xEF, 0xBB, 0xBF];
+    bytes.extend_from_slice(csv.as_bytes());
+
+    fs::write(&dir, &bytes).map_err(|e| AppError::Other(format!("Dosya yazilamadi: {}", e)))?;
+
+    Ok(dir.to_string_lossy().to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -386,7 +440,8 @@ pub fn run() {
             adjust_stock,
             low_stock_products,
             list_transactions,
-            stock_value_report
+            stock_value_report,
+            export_products_csv
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
