@@ -487,7 +487,20 @@
         </div>
         <div class="field">
           <label for="p-unit">Birim</label>
-          <input id="p-unit" placeholder="adet, kg, lt..." value="adet">
+          <select id="p-unit">
+            <option value="adet">adet</option>
+            <option value="kg">kg</option>
+            <option value="g">g</option>
+            <option value="lt">lt</option>
+            <option value="ml">ml</option>
+            <option value="m">m</option>
+            <option value="cm">cm</option>
+            <option value="paket">paket</option>
+            <option value="kutu">kutu</option>
+            <option value="koli">koli</option>
+            <option value="çift">çift</option>
+            <option value="set">set</option>
+          </select>
         </div>
         <div class="field">
           <label for="p-buy">Alış Fiyatı (₺)</label>
@@ -1012,16 +1025,31 @@ window.printProductBarcode = function(p) {
   const htmlDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiket - ' + name.replace(/</g,'') + '</title>' +
     '<style>@page{margin:8mm;size:auto}body{font-family:system-ui,sans-serif;text-align:center;margin:0;padding:12px;color:#000;background:#fff}.name{font-size:15px;font-weight:700;margin-bottom:10px}svg{max-width:100%;height:auto}</style></head><body>' +
     '<div class="name">' + name.replace(/</g,'&lt;') + '</div>' + svgHtml + priceLine +
-    '<script>window.onload=function(){setTimeout(function(){window.print()},200)}<\/script></body></html>';
+    '</body></html>';
 
-  const w = window.open('', '_blank', 'width=400,height=320');
-  if (!w) {
-    toast('Pop-up engellendi. İzin verin.', 'error');
-    return;
+  // Popup yerine gizli iframe kullan (engellenmez)
+  let iframe = document.getElementById('print-iframe');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'print-iframe';
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;left:-9999px;top:-9999px;';
+    document.body.appendChild(iframe);
   }
-  w.document.open();
-  w.document.write(htmlDoc);
-  w.document.close();
+
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(htmlDoc);
+  doc.close();
+
+  // Yazdırma diyalogunu aç
+  setTimeout(function() {
+    try {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } catch (err) {
+      toast('Yazdırma başlatılamadı: ' + err.message, 'error');
+    }
+  }, 250);
 };
 
 const _prevEditProduct = window.editProduct;
