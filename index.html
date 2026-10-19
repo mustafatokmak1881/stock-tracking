@@ -474,8 +474,8 @@
         <div class="field">
           <label for="p-barcode">Barkod</label>
           <div class="form-row" style="gap:.35rem">
-            <input id="p-barcode" placeholder="Barkod numarası" style="flex:1" oninput="updateBarcodePreview()">
-            <button type="button" class="btn-generate" onclick="generateBarcode()" title="Otomatik barkod oluştur">
+            <input id="p-barcode" placeholder="Barkod numarası" style="flex:1" oninput="updateBarcodePreview()" onkeydown="if(event.key==='Enter'){event.preventDefault(); event.stopPropagation(); this.blur();}">
+            <button type="button" class="btn-generate" onclick="generateBarcode(); return false;" title="Otomatik barkod oluştur (sadece bu butona basınca)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
               Barkod Oluştur
             </button>
@@ -948,6 +948,12 @@ function ean13CheckDigit(digits12) {
 }
 
 window.generateBarcode = function() {
+  const current = document.getElementById('p-barcode').value.trim();
+  if (current) {
+    if (!confirm('Mevcut barkod silinip yeni barkod oluşturulacak. Emin misiniz?\n\nMevcut: ' + current)) {
+      return;
+    }
+  }
   const ts = Date.now().toString();
   const base = ('2' + ts.slice(-11)).slice(0, 12);
   const code = base + ean13CheckDigit(base);
@@ -1025,31 +1031,19 @@ window.printProductBarcode = function(p) {
   const htmlDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiket - ' + name.replace(/</g,'') + '</title>' +
     '<style>@page{margin:8mm;size:auto}body{font-family:system-ui,sans-serif;text-align:center;margin:0;padding:12px;color:#000;background:#fff}.name{font-size:15px;font-weight:700;margin-bottom:10px}svg{max-width:100%;height:auto}</style></head><body>' +
     '<div class="name">' + name.replace(/</g,'&lt;') + '</div>' + svgHtml + priceLine +
+    '<div style="margin-top:16px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">Yazdır</button> ' +
+    '<button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;">Kapat</button></div>' +
     '</body></html>';
 
-  // Popup yerine gizli iframe kullan (engellenmez)
-  let iframe = document.getElementById('print-iframe');
-  if (!iframe) {
-    iframe = document.createElement('iframe');
-    iframe.id = 'print-iframe';
-    iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;left:-9999px;top:-9999px;';
-    document.body.appendChild(iframe);
+  // Yeni pencerede aç (uygulama kapanmasın)
+  const w = window.open('', '_blank', 'width=420,height=380,noopener,noreferrer');
+  if (!w) {
+    toast('Pop-up engellendi. Tarayıcıda pop-up izni verin.', 'error');
+    return;
   }
-
-  const doc = iframe.contentWindow.document;
-  doc.open();
-  doc.write(htmlDoc);
-  doc.close();
-
-  // Yazdırma diyalogunu aç
-  setTimeout(function() {
-    try {
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-    } catch (err) {
-      toast('Yazdırma başlatılamadı: ' + err.message, 'error');
-    }
-  }, 250);
+  w.document.open();
+  w.document.write(htmlDoc);
+  w.document.close();
 };
 
 const _prevEditProduct = window.editProduct;
