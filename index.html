@@ -393,6 +393,19 @@
     transform: scale(0.97);
   }
   .btn-generate svg { flex-shrink: 0; }
+
+  .btn-barcode {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+  }
+  .btn-barcode:hover:not(:disabled) {
+    background: #dbeafe;
+  }
+  .btn-barcode:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
 </style>
 </head>
 <body>
@@ -695,6 +708,7 @@ async function loadProducts() {
         <td>₺${p.buy_price}</td>
         <td>₺${p.sell_price}</td>
         <td>
+          <button class="btn btn-sm btn-barcode" onclick='printProductBarcode(${JSON.stringify({barcode: p.barcode||"", name: p.name, sell_price: p.sell_price})})' title="Barkod yazdır" ${p.barcode ? "" : "disabled"}>Barkod</button>
           <button class="btn btn-sm" onclick='editProduct(${JSON.stringify(p)})'>Düzenle</button>
           <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Sil</button>
         </td>
@@ -936,6 +950,52 @@ window.updateBarcodePreview = function() {
     box.classList.remove('show');
   }
 };
+
+
+window.printProductBarcode = function(p) {
+  const code = (p.barcode || '').trim();
+  const name = p.name || 'Ürün';
+  const price = p.sell_price != null ? p.sell_price : '';
+  if (!code) return toast('Bu ürünün barkodu yok', 'error');
+
+  const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
+  const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  tmp.id = 'tmp-barcode-print';
+  document.body.appendChild(tmp);
+  try {
+    JsBarcode(tmp, code, {
+      format: format,
+      width: 2.2,
+      height: 56,
+      displayValue: true,
+      fontSize: 13,
+      margin: 6,
+      background: '#ffffff',
+      lineColor: '#000000'
+    });
+  } catch (err) {
+    tmp.remove();
+    return toast('Barkod oluşturulamadı', 'error');
+  }
+  const svgHtml = tmp.outerHTML;
+  tmp.remove();
+
+  const priceLine = price !== '' && price != null ? '<div style="font-size:13px;margin-top:6px;">Satış: ₺' + price + '</div>' : '';
+  const htmlDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiket - ' + name.replace(/</g,'') + '</title>' +
+    '<style>@page{margin:8mm;size:auto}body{font-family:system-ui,sans-serif;text-align:center;margin:0;padding:12px;color:#000;background:#fff}.name{font-size:15px;font-weight:700;margin-bottom:10px}svg{max-width:100%;height:auto}</style></head><body>' +
+    '<div class="name">' + name.replace(/</g,'&lt;') + '</div>' + svgHtml + priceLine +
+    '<script>window.onload=function(){setTimeout(function(){window.print()},200)}<\/script></body></html>';
+
+  const w = window.open('', '_blank', 'width=400,height=320');
+  if (!w) {
+    toast('Pop-up engellendi. İzin verin.', 'error');
+    return;
+  }
+  w.document.open();
+  w.document.write(htmlDoc);
+  w.document.close();
+};
+
 
 window.printBarcodeLabel = function() {
   const code = document.getElementById('p-barcode').value.trim();
