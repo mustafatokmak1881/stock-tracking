@@ -6,6 +6,7 @@
     "frontendDist": ".."
   },
   "app": {
+    "withGlobalTauri": true,
     "windows": [
       {
         "title": "Stok Takip",
