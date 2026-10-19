@@ -329,6 +329,29 @@
   }
 
   .barcode-result.show { display: block; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .field-actions {
+    min-width: 180px;
+  }
+  .field input {
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -389,16 +412,42 @@
   <section id="view-products" class="view hidden">
     <div class="card">
       <div class="card-title">Ürün Ekle / Düzenle</div>
-      <div class="form-row">
-        <input id="p-name" placeholder="Ürün adı *">
-        <input id="p-barcode" placeholder="Barkod">
-        <input id="p-sku" placeholder="SKU">
-        <input id="p-unit" placeholder="Birim" value="adet" style="width:80px">
-        <input id="p-buy" type="number" step="0.01" placeholder="Alış fiyatı" style="width:110px">
-        <input id="p-sell" type="number" step="0.01" placeholder="Satış fiyatı" style="width:110px">
-        <input id="p-min" type="number" placeholder="Min stok" value="0" style="width:90px">
-        <button class="btn btn-primary" onclick="saveProduct()">Kaydet</button>
-        <button class="btn" onclick="resetProductForm()">Temizle</button>
+      <div class="form-grid">
+        <div class="field">
+          <label for="p-name">Ürün Adı *</label>
+          <input id="p-name" placeholder="Örn: Ebru Kolonya">
+        </div>
+        <div class="field">
+          <label for="p-barcode">Barkod</label>
+          <input id="p-barcode" placeholder="Barkod numarası">
+        </div>
+        <div class="field">
+          <label for="p-sku">SKU / Stok Kodu</label>
+          <input id="p-sku" placeholder="İç kod">
+        </div>
+        <div class="field">
+          <label for="p-unit">Birim</label>
+          <input id="p-unit" placeholder="adet, kg, lt..." value="adet">
+        </div>
+        <div class="field">
+          <label for="p-buy">Alış Fiyatı (₺)</label>
+          <input id="p-buy" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="p-sell">Satış Fiyatı (₺)</label>
+          <input id="p-sell" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="p-min">Min. Stok Seviyesi</label>
+          <input id="p-min" type="number" placeholder="0" value="0">
+        </div>
+        <div class="field field-actions">
+          <label>&nbsp;</label>
+          <div class="form-row">
+            <button class="btn btn-primary" onclick="saveProduct()">Kaydet</button>
+            <button class="btn" onclick="resetProductForm()">Temizle</button>
+          </div>
+        </div>
       </div>
       <input type="hidden" id="p-id">
     </div>
