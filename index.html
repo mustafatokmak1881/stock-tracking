@@ -952,6 +952,17 @@ window.updateBarcodePreview = function() {
 };
 
 
+
+window.printBarcodeLabel = function() {
+  const code = document.getElementById('p-barcode').value.trim();
+  const name = document.getElementById('p-name').value.trim() || 'Ürün';
+  const price = document.getElementById('p-sell').value || '';
+  if (!code) return toast('Önce barkod girin veya oluşturun', 'error');
+
+  // Reuse the product version
+  window.printProductBarcode({ barcode: code, name: name, sell_price: price });
+};
+
 window.printProductBarcode = function(p) {
   const code = (p.barcode || '').trim();
   const name = p.name || 'Ürün';
