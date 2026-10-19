@@ -365,15 +365,34 @@
   .barcode-preview-box.show { display: block; }
   .barcode-preview-box svg { max-width: 100%; height: auto; }
   .barcode-actions { display: flex; gap: .5rem; justify-content: center; margin-top: .75rem; flex-wrap: wrap; }
-  @media print {
-    body * { visibility: hidden; }
-    #print-label, #print-label * { visibility: visible; }
-    #print-label {
-      position: absolute; left: 0; top: 0; width: 100%;
-      text-align: center; padding: 1rem;
-    }
+  
   }
   #print-label { display: none; }
+
+  .btn-generate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+    transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+  }
+  .btn-generate:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+  }
+  .btn-generate:active {
+    transform: scale(0.97);
+  }
+  .btn-generate svg { flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -443,7 +462,10 @@
           <label for="p-barcode">Barkod</label>
           <div class="form-row" style="gap:.35rem">
             <input id="p-barcode" placeholder="Barkod numarası" style="flex:1" oninput="updateBarcodePreview()">
-            <button type="button" class="btn btn-sm" onclick="generateBarcode()" title="Otomatik barkod oluştur">Oluştur</button>
+            <button type="button" class="btn-generate" onclick="generateBarcode()" title="Otomatik barkod oluştur">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+              Barkod Oluştur
+            </button>
           </div>
         </div>
         <div class="field">
@@ -918,24 +940,69 @@ window.updateBarcodePreview = function() {
 window.printBarcodeLabel = function() {
   const code = document.getElementById('p-barcode').value.trim();
   const name = document.getElementById('p-name').value.trim() || 'Ürün';
+  const price = document.getElementById('p-sell').value || '';
   if (!code) return toast('Önce barkod girin veya oluşturun', 'error');
+
+  const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
+
+  // Geçici SVG üret
+  const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  tmp.id = 'tmp-barcode-print';
+  document.body.appendChild(tmp);
   try {
-    const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
-    JsBarcode('#print-barcode-svg', code, {
+    JsBarcode(tmp, code, {
       format: format,
-      width: 2,
-      height: 50,
-      displayValue: false,
-      margin: 4,
+      width: 2.2,
+      height: 56,
+      displayValue: true,
+      fontSize: 13,
+      margin: 6,
       background: '#ffffff',
       lineColor: '#000000'
     });
-    document.getElementById('print-name').textContent = name;
-    document.getElementById('print-code').textContent = code;
-    window.print();
   } catch (err) {
-    toast('Barkod yazdırılamadı', 'error');
+    tmp.remove();
+    return toast('Barkod oluşturulamadı', 'error');
   }
+  const svgHtml = tmp.outerHTML;
+  tmp.remove();
+
+  const priceLine = price ? '<div style="font-size:13px;margin-top:6px;">Satış: ₺' + price + '</div>' : '';
+  const htmlDoc = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Etiket</title>
+<style>
+  @page { margin: 8mm; size: auto; }
+  body {
+    font-family: system-ui, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 12px;
+    color: #000;
+    background: #fff;
+  }
+  .name { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+  svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+  <div class="name">${name.replace(/</g,'&lt;')}</div>
+  ${svgHtml}
+  ${priceLine}
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 200);
+    };
+  </script>
+</body></html>`;
+
+  const w = window.open('', '_blank', 'width=400,height=300');
+  if (!w) {
+    toast('Pop-up engellendi. Tarayıcıda pop-up izni verin.', 'error');
+    return;
+  }
+  w.document.open();
+  w.document.write(htmlDoc);
+  w.document.close();
 };
 
 const _prevEditProduct = window.editProduct;
