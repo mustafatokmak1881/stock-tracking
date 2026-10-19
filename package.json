@@ -6,7 +6,12 @@
   "scripts": {
     "tauri": "tauri",
     "dev": "tauri dev",
+<<<<<<< HEAD
     "build": "tauri build"
+=======
+    "build": "tauri build",
+    "copy-ui": "node scripts/copy-ui.js"
+>>>>>>> 9eeca332f21c68e9f9266527f32a8dfe8b04e076
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
