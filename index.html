@@ -5,188 +5,507 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stok Takip</title>
 <style>
-:root {
-  --bg: #0f172a; --surface: #1e293b; --text: #f1f5f9; --muted: #94a3b8;
-  --primary: #3b82f6; --danger: #ef4444; --success: #22c55e; --border: #334155;
-  --warning: #f59e0b;
-}
-[data-theme="light"] {
-  --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --muted: #64748b;
-  --primary: #2563eb; --danger: #dc2626; --success: #16a34a; --border: #e2e8f0;
-  --warning: #d97706;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: var(--bg); color: var(--text);
-  min-height: 100vh; padding: 1rem;
-}
-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
-}
-h1 { font-size: 1.3rem; font-weight: 600; }
-nav { display: flex; gap: .4rem; flex-wrap: wrap; }
-nav button, .btn {
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); padding: .4rem .75rem; border-radius: 6px;
-  cursor: pointer; font-size: .85rem;
-}
-nav button.active, .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
-.btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
-.btn-sm { padding: .2rem .45rem; font-size: .8rem; }
-.card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 1rem; margin-bottom: 1rem;
-}
-.alert { border-left: 4px solid var(--danger); }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 800px) { .grid-2 { grid-template-columns: 1fr; } }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: .45rem .6rem; border-bottom: 1px solid var(--border); text-align: left; font-size: .87rem; }
-th { color: var(--muted); font-weight: 500; font-size: .75rem; }
-input, select {
-  padding: .4rem .6rem; border-radius: 6px; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text); font-size: .87rem;
-}
-.form-row { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .5rem; align-items: center; }
-#toast {
-  position: fixed; bottom: 1.2rem; right: 1.2rem; padding: .7rem 1.1rem;
-  border-radius: 8px; background: var(--surface); border: 1px solid var(--border);
-  box-shadow: 0 4px 20px rgba(0,0,0,.3); display: none; z-index: 100;
-}
-#toast.show { display: block; }
-#toast.success { border-left: 4px solid var(--success); }
-#toast.error { border-left: 4px solid var(--danger); }
-.hidden { display: none !important; }
-.stat { font-size: 1.4rem; font-weight: 600; }
-.stat-label { font-size: .78rem; color: var(--muted); }
-.stats { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-kbd {
-  background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
-  padding: .1rem .35rem; font-size: .75rem;
-}
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --text: #1a1d23;
+    --text-secondary: #5c6578;
+    --muted: #8b93a7;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --danger: #dc2626;
+    --danger-soft: #fef2f2;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --warning: #d97706;
+    --border: #e5e9f0;
+    --border-strong: #d1d5db;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--shadow);
+  }
+
+  .logo {
+    font-size: 1.15rem;
+    font-weight: 650;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .logo span {
+    background: var(--primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+  }
+
+  nav {
+    display: flex;
+    gap: .25rem;
+  }
+
+  nav button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: .45rem .9rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: all .15s;
+  }
+
+  nav button:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  nav button.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  /* Main */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: .95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.15rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-top: .15rem;
+  }
+
+  /* Alert */
+  .alert {
+    border-left: 4px solid var(--danger);
+    background: var(--danger-soft);
+  }
+
+  .alert-ok {
+    border-left: 4px solid var(--success);
+    background: var(--success-soft);
+  }
+
+  /* Forms */
+  .form-row {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  input, select {
+    padding: .5rem .75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  input::placeholder {
+    color: var(--muted);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .btn:hover {
+    background: var(--bg);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  .btn-sm {
+    padding: .28rem .55rem;
+    font-size: .8rem;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: left;
+    padding: .65rem .75rem;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+  }
+
+  td {
+    padding: .7rem .75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: .875rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #f8fafc;
+  }
+
+  /* Grid */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    nav { display: none; }
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: .75rem 1.25rem;
+    border-radius: var(--radius);
+    background: var(--text);
+    color: #fff;
+    font-size: .875rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    display: none;
+    z-index: 100;
+    max-width: 320px;
+  }
+
+  #toast.show { display: block; animation: slideIn .25s ease; }
+  #toast.error { background: var(--danger); }
+  #toast.success { background: var(--success); }
+
+  @keyframes slideIn {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .hidden { display: none !important; }
+
+  .muted { color: var(--muted); font-size: .85rem; }
+
+  kbd {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: .1rem .4rem;
+    font-size: .75rem;
+    font-family: inherit;
+    color: var(--text-secondary);
+  }
+
+  .barcode-result {
+    margin-top: .75rem;
+    padding: .75rem 1rem;
+    background: var(--primary-soft);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    font-weight: 500;
+    display: none;
+  }
+
+  .barcode-result.show { display: block; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Stok Takip</h1>
+  <div class="logo"><span>S</span> Stok Takip</div>
   <nav>
     <button class="active" data-view="dashboard">Dashboard</button>
     <button data-view="products">Ürünler</button>
     <button data-view="stock">Stok İşlem</button>
     <button data-view="history">Hareketler</button>
     <button data-view="reports">Raporlar</button>
-    <button id="theme-btn" title="Tema">🌓</button>
   </nav>
 </header>
 
-<div id="toast"></div>
+<main>
+  <div id="toast"></div>
 
-<!-- DASHBOARD -->
-<section id="view-dashboard" class="view">
-  <div class="card stats" id="stats-box">
-    <div><div class="stat" id="stat-products">0</div><div class="stat-label">Ürün</div></div>
-    <div><div class="stat" id="stat-low">0</div><div class="stat-label">Kritik Stok</div></div>
-    <div><div class="stat" id="stat-cost">0</div><div class="stat-label">Toplam Maliyet</div></div>
-    <div><div class="stat" id="stat-sell">0</div><div class="stat-label">Potansiyel Satış</div></div>
-  </div>
-  <div class="card alert" id="low-stock-box">Kritik stok yok</div>
-  <div class="card">
-    <div class="form-row">
-      <input id="barcode-search" placeholder="Barkod okut / ara... (Enter)" style="min-width:220px" autofocus>
-      <button class="btn-primary" onclick="searchBarcode()">Ara</button>
-      <span class="stat-label">Kısayollar: <kbd>F2</kbd> Yeni Ürün · <kbd>F4</kbd> Barkod · <kbd>F5</kbd> Yenile</span>
+  <!-- DASHBOARD -->
+  <section id="view-dashboard" class="view">
+    <div class="stats" id="stats-box">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-products">0</div>
+        <div class="stat-label">Toplam Ürün</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-low">0</div>
+        <div class="stat-label">Kritik Stok</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-cost">₺0</div>
+        <div class="stat-label">Toplam Maliyet</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-sell">₺0</div>
+        <div class="stat-label">Potansiyel Satış</div>
+      </div>
     </div>
-    <div id="barcode-result" class="muted" style="margin-top:.5rem"></div>
-  </div>
-</section>
 
-<!-- PRODUCTS -->
-<section id="view-products" class="view hidden">
-  <div class="card">
-    <h3 style="margin-bottom:.6rem">Yeni / Düzenle Ürün</h3>
-    <div class="form-row">
-      <input id="p-name" placeholder="Ürün adı *">
-      <input id="p-barcode" placeholder="Barkod">
-      <input id="p-sku" placeholder="SKU">
-      <input id="p-unit" placeholder="Birim" value="adet" style="width:70px">
-      <input id="p-buy" type="number" step="0.01" placeholder="Alış" style="width:85px">
-      <input id="p-sell" type="number" step="0.01" placeholder="Satış" style="width:85px">
-      <input id="p-min" type="number" placeholder="Min" value="0" style="width:70px">
-      <button class="btn-primary" onclick="saveProduct()">Kaydet</button>
-      <button onclick="resetProductForm()">Temizle</button>
+    <div class="card" id="low-stock-box">
+      <div class="card-title">Kritik Stok Uyarıları</div>
+      <div class="muted">Kritik stok bulunmuyor</div>
     </div>
-    <input type="hidden" id="p-id">
-  </div>
-  <div class="card">
-    <div class="form-row">
-      <input id="product-search" placeholder="Ara (ad, barkod, sku)..." oninput="loadProducts()">
-    </div>
-    <table>
-      <thead><tr><th>Barkod</th><th>Ad</th><th>Stok</th><th>Alış</th><th>Satış</th><th>İşlem</th></tr></thead>
-      <tbody id="product-tbody"></tbody>
-    </table>
-  </div>
-</section>
 
-<!-- STOCK -->
-<section id="view-stock" class="view hidden">
-  <div class="grid-2">
     <div class="card">
-      <h3 style="margin-bottom:.6rem">Stok Giriş</h3>
+      <div class="card-title">Hızlı Barkod Arama</div>
       <div class="form-row">
-        <input id="in-barcode" placeholder="Barkod">
-        <input id="in-qty" type="number" placeholder="Miktar" value="1" style="width:80px">
-        <input id="in-price" type="number" step="0.01" placeholder="Alış fiyatı" style="width:100px">
-        <input id="in-ref" placeholder="Fiş/Fatura no">
-        <button class="btn-primary" onclick="doStockIn()">Giriş Yap</button>
+        <input id="barcode-search" placeholder="Barkod okutun veya yazın..." style="min-width:260px;flex:1" autofocus>
+        <button class="btn btn-primary" onclick="searchBarcode()">Ara</button>
+      </div>
+      <div id="barcode-result" class="barcode-result"></div>
+      <p class="muted" style="margin-top:.75rem">
+        Kısayollar: <kbd>F2</kbd> Yeni Ürün &nbsp; <kbd>F4</kbd> Barkod Odak &nbsp; <kbd>F5</kbd> Yenile
+      </p>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="view-products" class="view hidden">
+    <div class="card">
+      <div class="card-title">Ürün Ekle / Düzenle</div>
+      <div class="form-row">
+        <input id="p-name" placeholder="Ürün adı *">
+        <input id="p-barcode" placeholder="Barkod">
+        <input id="p-sku" placeholder="SKU">
+        <input id="p-unit" placeholder="Birim" value="adet" style="width:80px">
+        <input id="p-buy" type="number" step="0.01" placeholder="Alış fiyatı" style="width:110px">
+        <input id="p-sell" type="number" step="0.01" placeholder="Satış fiyatı" style="width:110px">
+        <input id="p-min" type="number" placeholder="Min stok" value="0" style="width:90px">
+        <button class="btn btn-primary" onclick="saveProduct()">Kaydet</button>
+        <button class="btn" onclick="resetProductForm()">Temizle</button>
+      </div>
+      <input type="hidden" id="p-id">
+    </div>
+
+    <div class="card">
+      <div class="form-row" style="margin-bottom:1rem">
+        <input id="product-search" placeholder="Ürünlerde ara (ad, barkod, SKU)..." style="flex:1;min-width:220px" oninput="loadProducts()">
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Barkod</th>
+            <th>Ürün Adı</th>
+            <th>Stok</th>
+            <th>Alış</th>
+            <th>Satış</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="product-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- STOCK -->
+  <section id="view-stock" class="view hidden">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Stok Giriş</div>
+        <div class="form-row">
+          <input id="in-barcode" placeholder="Barkod">
+          <input id="in-qty" type="number" placeholder="Miktar" value="1" style="width:90px">
+          <input id="in-price" type="number" step="0.01" placeholder="Alış fiyatı" style="width:110px">
+          <input id="in-ref" placeholder="Fiş / Fatura no">
+          <button class="btn btn-primary" onclick="doStockIn()">Giriş Yap</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Stok Çıkış</div>
+        <div class="form-row">
+          <input id="out-barcode" placeholder="Barkod">
+          <input id="out-qty" type="number" placeholder="Miktar" value="1" style="width:90px">
+          <input id="out-ref" placeholder="Fiş no">
+          <button class="btn btn-primary" onclick="doStockOut()">Çıkış Yap</button>
+        </div>
       </div>
     </div>
     <div class="card">
-      <h3 style="margin-bottom:.6rem">Stok Çıkış</h3>
+      <div class="card-title">Sayım / Stok Düzeltme</div>
       <div class="form-row">
-        <input id="out-barcode" placeholder="Barkod">
-        <input id="out-qty" type="number" placeholder="Miktar" value="1" style="width:80px">
-        <input id="out-ref" placeholder="Fiş no">
-        <button class="btn-primary" onclick="doStockOut()">Çıkış Yap</button>
+        <input id="adj-barcode" placeholder="Barkod">
+        <input id="adj-qty" type="number" placeholder="Yeni miktar" style="width:110px">
+        <input id="adj-notes" placeholder="Not (fire, kayıp, fazlalık...)" style="flex:1;min-width:180px">
+        <button class="btn btn-primary" onclick="doAdjust()">Düzelt</button>
       </div>
     </div>
-  </div>
-  <div class="card">
-    <h3 style="margin-bottom:.6rem">Sayım / Düzeltme</h3>
-    <div class="form-row">
-      <input id="adj-barcode" placeholder="Barkod">
-      <input id="adj-qty" type="number" placeholder="Yeni miktar" style="width:100px">
-      <input id="adj-notes" placeholder="Not (fire, kayıp...)">
-      <button class="btn-primary" onclick="doAdjust()">Düzelt</button>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="view-history" class="view hidden">
+    <div class="card">
+      <div class="card-title">Son Stok Hareketleri</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Tarih</th>
+            <th>Ürün</th>
+            <th>İşlem</th>
+            <th>Miktar</th>
+            <th>Fiyat</th>
+            <th>Not / Referans</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- HISTORY -->
-<section id="view-history" class="view hidden">
-  <div class="card">
-    <h3 style="margin-bottom:.6rem">Son Hareketler</h3>
-    <table>
-      <thead><tr><th>Tarih</th><th>Ürün</th><th>Tip</th><th>Miktar</th><th>Fiyat</th><th>Not</th></tr></thead>
-      <tbody id="history-tbody"></tbody>
-    </table>
-  </div>
-</section>
-
-<!-- REPORTS -->
-<section id="view-reports" class="view hidden">
-  <div class="card stats" id="report-stats"></div>
-  <div class="card">
-    <button class="btn-primary" onclick="exportCsv()">CSV Olarak İndir (Ürünler)</button>
-  </div>
-</section>
+  <!-- REPORTS -->
+  <section id="view-reports" class="view hidden">
+    <div class="stats" id="report-stats"></div>
+    <div class="card">
+      <div class="card-title">Dışa Aktar</div>
+      <button class="btn btn-primary" onclick="exportCsv()">Ürün Listesini CSV İndir</button>
+    </div>
+  </section>
+</main>
 
 <script type="module">
-const { invoke } = window.__TAURI__.core;
+function getInvoke() {
+  if (window.__TAURI__?.core?.invoke) return window.__TAURI__.core.invoke;
+  if (window.__TAURI_INTERNALS__?.invoke) return window.__TAURI_INTERNALS__.invoke;
+  return null;
+}
 
-let currentView = 'dashboard';
+const invoke = getInvoke();
+if (!invoke) {
+  document.body.innerHTML = `
+    <div style="max-width:520px;margin:4rem auto;padding:2rem;font-family:system-ui;text-align:center">
+      <h2 style="margin-bottom:1rem">Tauri API bulunamadı</h2>
+      <p style="color:#5c6578;margin-bottom:1.5rem">Bu sayfayı doğrudan tarayıcıda açmış olabilirsiniz.</p>
+      <pre style="background:#f4f6f9;padding:1rem;border-radius:8px;text-align:left;font-size:.85rem">cd stock-tracking-mvp
+npm install
+npm run dev</pre>
+    </div>`;
+  throw new Error('Tauri API yok');
+}
 
 function toast(msg, type = 'success') {
   const el = document.getElementById('toast');
@@ -201,7 +520,6 @@ function showView(name) {
   document.querySelectorAll('nav button[data-view]').forEach(b => {
     b.classList.toggle('active', b.dataset.view === name);
   });
-  currentView = name;
   if (name === 'dashboard') refreshDashboard();
   if (name === 'products') loadProducts();
   if (name === 'history') loadHistory();
@@ -212,19 +530,6 @@ document.querySelectorAll('nav button[data-view]').forEach(btn => {
   btn.addEventListener('click', () => showView(btn.dataset.view));
 });
 
-// Theme
-const themeBtn = document.getElementById('theme-btn');
-themeBtn.onclick = () => {
-  const html = document.documentElement;
-  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  html.setAttribute('data-theme', next === 'dark' ? '' : 'light');
-  localStorage.setItem('theme', next);
-};
-if (localStorage.getItem('theme') === 'light') {
-  document.documentElement.setAttribute('data-theme', 'light');
-}
-
-// Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
     if (e.key === 'Enter' && e.target.id === 'barcode-search') {
@@ -243,19 +548,18 @@ async function refreshDashboard() {
     const report = await invoke('stock_value_report');
     document.getElementById('stat-products').textContent = report.product_count;
     document.getElementById('stat-low').textContent = report.low_stock_count;
-    document.getElementById('stat-cost').textContent = report.total_cost.toFixed(2);
-    document.getElementById('stat-sell').textContent = report.total_sell_value.toFixed(2);
+    document.getElementById('stat-cost').textContent = '₺' + report.total_cost.toFixed(2);
+    document.getElementById('stat-sell').textContent = '₺' + report.total_sell_value.toFixed(2);
 
     const low = await invoke('low_stock_products');
     const box = document.getElementById('low-stock-box');
     if (!low.length) {
-      box.className = 'card';
-      box.textContent = 'Kritik stok yok';
+      box.className = 'card alert-ok';
+      box.innerHTML = '<div class="card-title">Kritik Stok Uyarıları</div><div class="muted">Kritik stok bulunmuyor</div>';
     } else {
       box.className = 'card alert';
-      box.innerHTML = low.map(p =>
-        `<div style="margin-bottom:.3rem"><strong>${p.name}</strong> — ${p.current_stock} ${p.unit} (min: ${p.min_stock_level})</div>`
-      ).join('');
+      box.innerHTML = '<div class="card-title">Kritik Stok Uyarıları</div>' +
+        low.map(p => `<div style="margin-bottom:.35rem"><strong>${p.name}</strong> — ${p.current_stock} ${p.unit} <span class="muted">(min: ${p.min_stock_level})</span></div>`).join('');
     }
   } catch (e) {
     toast(String(e), 'error');
@@ -268,19 +572,19 @@ async function loadProducts() {
     const products = await invoke('list_products', { search: q });
     const tbody = document.getElementById('product-tbody');
     if (!products.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Ürün yok</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">Henüz ürün eklenmemiş</td></tr>';
       return;
     }
     tbody.innerHTML = products.map(p => `
       <tr>
-        <td>${p.barcode || '-'}</td>
-        <td>${p.name}</td>
+        <td>${p.barcode || '—'}</td>
+        <td><strong>${p.name}</strong></td>
         <td>${p.current_stock} ${p.unit}</td>
-        <td>${p.buy_price}</td>
-        <td>${p.sell_price}</td>
+        <td>₺${p.buy_price}</td>
+        <td>₺${p.sell_price}</td>
         <td>
-          <button class="btn-sm" onclick='editProduct(${JSON.stringify(p)})'>Düzenle</button>
-          <button class="btn-sm btn-danger" onclick="deleteProduct(${p.id})">Sil</button>
+          <button class="btn btn-sm" onclick='editProduct(${JSON.stringify(p)})'>Düzenle</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Sil</button>
         </td>
       </tr>
     `).join('');
@@ -302,13 +606,8 @@ window.editProduct = function(p) {
 };
 
 window.resetProductForm = function() {
-  document.getElementById('p-id').value = '';
-  document.getElementById('p-name').value = '';
-  document.getElementById('p-barcode').value = '';
-  document.getElementById('p-sku').value = '';
+  ['p-id','p-name','p-barcode','p-sku','p-buy','p-sell'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-unit').value = 'adet';
-  document.getElementById('p-buy').value = '';
-  document.getElementById('p-sell').value = '';
   document.getElementById('p-min').value = '0';
 };
 
@@ -316,33 +615,21 @@ window.saveProduct = async function() {
   const name = document.getElementById('p-name').value.trim();
   if (!name) return toast('Ürün adı zorunlu', 'error');
   const id = document.getElementById('p-id').value;
+  const payload = {
+    name,
+    barcode: document.getElementById('p-barcode').value.trim() || null,
+    sku: document.getElementById('p-sku').value.trim() || null,
+    unit: document.getElementById('p-unit').value.trim() || 'adet',
+    buy_price: +document.getElementById('p-buy').value || 0,
+    sell_price: +document.getElementById('p-sell').value || 0,
+    min_stock_level: +document.getElementById('p-min').value || 0
+  };
   try {
     if (id) {
-      await invoke('update_product', {
-        p: {
-          id: +id,
-          name,
-          barcode: document.getElementById('p-barcode').value.trim() || null,
-          sku: document.getElementById('p-sku').value.trim() || null,
-          unit: document.getElementById('p-unit').value.trim() || 'adet',
-          buy_price: +document.getElementById('p-buy').value || 0,
-          sell_price: +document.getElementById('p-sell').value || 0,
-          min_stock_level: +document.getElementById('p-min').value || 0
-        }
-      });
+      await invoke('update_product', { p: { id: +id, ...payload } });
       toast('Ürün güncellendi');
     } else {
-      await invoke('create_product', {
-        p: {
-          name,
-          barcode: document.getElementById('p-barcode').value.trim() || null,
-          sku: document.getElementById('p-sku').value.trim() || null,
-          unit: document.getElementById('p-unit').value.trim() || 'adet',
-          buy_price: +document.getElementById('p-buy').value || 0,
-          sell_price: +document.getElementById('p-sell').value || 0,
-          min_stock_level: +document.getElementById('p-min').value || 0
-        }
-      });
+      await invoke('create_product', { p: payload });
       toast('Ürün eklendi');
     }
     resetProductForm();
@@ -370,13 +657,15 @@ async function findByBarcode(barcode) {
 window.searchBarcode = async function() {
   const barcode = document.getElementById('barcode-search').value.trim();
   if (!barcode) return;
+  const resultEl = document.getElementById('barcode-result');
   try {
     const p = await findByBarcode(barcode);
-    document.getElementById('barcode-result').innerHTML =
-      `<strong>${p.name}</strong> — Stok: ${p.current_stock} ${p.unit} | Alış: ${p.buy_price} | Satış: ${p.sell_price}`;
+    resultEl.innerHTML = `<strong>${p.name}</strong> &nbsp; Stok: ${p.current_stock} ${p.unit} &nbsp;·&nbsp; Alış: ₺${p.buy_price} &nbsp;·&nbsp; Satış: ₺${p.sell_price}`;
+    resultEl.classList.add('show');
     document.getElementById('barcode-search').select();
   } catch {
-    document.getElementById('barcode-result').textContent = 'Ürün bulunamadı: ' + barcode;
+    resultEl.textContent = 'Ürün bulunamadı: ' + barcode;
+    resultEl.classList.add('show');
   }
 };
 
@@ -393,7 +682,7 @@ window.doStockIn = async function() {
       referenceNo: document.getElementById('in-ref').value.trim() || null,
       notes: null
     });
-    toast(`Giriş: ${p.name} +${qty}`);
+    toast(`Giriş yapıldı: ${p.name} +${qty}`);
     document.getElementById('in-barcode').value = '';
     document.getElementById('in-barcode').focus();
   } catch (e) {
@@ -413,7 +702,7 @@ window.doStockOut = async function() {
       referenceNo: document.getElementById('out-ref').value.trim() || null,
       notes: null
     });
-    toast(`Çıkış: ${p.name} -${qty}`);
+    toast(`Çıkış yapıldı: ${p.name} −${qty}`);
     document.getElementById('out-barcode').value = '';
     document.getElementById('out-barcode').focus();
   } catch (e) {
@@ -444,7 +733,7 @@ async function loadHistory() {
     const list = await invoke('list_transactions', { limit: 100 });
     const tbody = document.getElementById('history-tbody');
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Hareket yok</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">Henüz hareket yok</td></tr>';
       return;
     }
     const typeMap = { in: 'Giriş', out: 'Çıkış', adjustment: 'Düzeltme' };
@@ -454,8 +743,8 @@ async function loadHistory() {
         <td>${t.product_name}</td>
         <td>${typeMap[t.transaction_type] || t.transaction_type}</td>
         <td>${t.quantity}</td>
-        <td>${t.unit_price ?? '-'}</td>
-        <td>${t.notes || t.reference_no || '-'}</td>
+        <td>${t.unit_price != null ? '₺' + t.unit_price : '—'}</td>
+        <td>${t.notes || t.reference_no || '—'}</td>
       </tr>
     `).join('');
   } catch (e) {
@@ -467,10 +756,10 @@ async function loadReport() {
   try {
     const r = await invoke('stock_value_report');
     document.getElementById('report-stats').innerHTML = `
-      <div><div class="stat">${r.product_count}</div><div class="stat-label">Toplam Ürün</div></div>
-      <div><div class="stat">${r.low_stock_count}</div><div class="stat-label">Kritik Stok</div></div>
-      <div><div class="stat">${r.total_cost.toFixed(2)}</div><div class="stat-label">Toplam Maliyet</div></div>
-      <div><div class="stat">${r.total_sell_value.toFixed(2)}</div><div class="stat-label">Potansiyel Satış Değeri</div></div>
+      <div class="stat-card"><div class="stat-value">${r.product_count}</div><div class="stat-label">Toplam Ürün</div></div>
+      <div class="stat-card"><div class="stat-value">${r.low_stock_count}</div><div class="stat-label">Kritik Stok</div></div>
+      <div class="stat-card"><div class="stat-value">₺${r.total_cost.toFixed(2)}</div><div class="stat-label">Toplam Maliyet</div></div>
+      <div class="stat-card"><div class="stat-value">₺${r.total_sell_value.toFixed(2)}</div><div class="stat-label">Potansiyel Satış</div></div>
     `;
   } catch (e) {
     toast(String(e), 'error');
@@ -497,7 +786,6 @@ window.exportCsv = async function() {
   }
 };
 
-// Init
 refreshDashboard();
 </script>
 </body>
