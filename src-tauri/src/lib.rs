@@ -376,16 +376,13 @@ fn stock_value_report() -> Result<StockValueReport, AppError> {
 
 #[tauri::command]
 fn export_products_csv() -> Result<String, AppError> {
-    use std::fs;
-    use std::path::PathBuf;
-    use std::time::{SystemTime, UNIX_EPOCH};
-
     let conn = DB.lock().unwrap();
     let mut stmt = conn.prepare(
         "SELECT id, sku, barcode, name, unit, buy_price, sell_price, min_stock_level, current_stock FROM products ORDER BY name"
     )?;
 
-    let mut csv = String::from("id,sku,barcode,name,unit,buy_price,sell_price,min_stock_level,current_stock\n");
+    // UTF-8 BOM so Excel opens Turkish characters correctly
+    let mut csv = String::from("\u{feff}id,sku,barcode,name,unit,buy_price,sell_price,min_stock_level,current_stock\n");
 
     let rows = stmt.query_map([], |row| {
         Ok((
@@ -410,20 +407,7 @@ fn export_products_csv() -> Result<String, AppError> {
         ));
     }
 
-    let mut dir = PathBuf::from("exports");
-    fs::create_dir_all(&dir).map_err(|e| AppError::Other(format!("Klasor olusturulamadi: {}", e)))?;
-
-    let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs();
-    let filename = format!("stok-urunler-{}.csv", ts);
-    dir.push(&filename);
-
-    // UTF-8 BOM so Excel opens Turkish characters correctly
-    let mut bytes = vec![0xEF, 0xBB, 0xBF];
-    bytes.extend_from_slice(csv.as_bytes());
-
-    fs::write(&dir, &bytes).map_err(|e| AppError::Other(format!("Dosya yazilamadi: {}", e)))?;
-
-    Ok(dir.to_string_lossy().to_string())
+    Ok(csv)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

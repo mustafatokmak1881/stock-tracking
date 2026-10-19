@@ -406,6 +406,40 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+
+  /* Print label styles */
+  #print-label-area {
+    display: none;
+  }
+  @media print {
+    body * {
+      visibility: hidden !important;
+    }
+    #print-label-area, #print-label-area * {
+      visibility: visible !important;
+    }
+    #print-label-area {
+      display: block !important;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      text-align: center;
+      padding: 12px;
+      background: #fff;
+      color: #000;
+    }
+    #print-label-area .name {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    #print-label-area svg {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -622,6 +656,13 @@
       <button class="btn btn-primary" onclick="exportCsv()">Ürün Listesini CSV İndir</button>
     </div>
   </section>
+
+<div id="print-label-area">
+  <div class="name" id="print-label-name"></div>
+  <div id="print-label-svg"></div>
+  <div id="print-label-price" style="font-size:13px;margin-top:6px;"></div>
+</div>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
@@ -932,8 +973,18 @@ async function loadReport() {
 
 window.exportCsv = async function() {
   try {
-    const path = await invoke('export_products_csv');
-    toast('CSV kaydedildi: ' + path);
+    const csv = await invoke('export_products_csv');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
+    a.href = url;
+    a.download = 'stok-urunler-' + ts + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('CSV indirme başlatıldı — kaydedilecek yeri seçin');
   } catch (e) {
     toast(String(e), 'error');
   }
@@ -1006,9 +1057,13 @@ window.printProductBarcode = function(p) {
   if (!code) return toast('Bu ürünün barkodu yok', 'error');
 
   const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
+
+  // SVG oluştur
+  const svgContainer = document.getElementById('print-label-svg');
+  svgContainer.innerHTML = '';
   const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  tmp.id = 'tmp-barcode-print';
-  document.body.appendChild(tmp);
+  svgContainer.appendChild(tmp);
+
   try {
     JsBarcode(tmp, code, {
       format: format,
@@ -1021,29 +1076,24 @@ window.printProductBarcode = function(p) {
       lineColor: '#000000'
     });
   } catch (err) {
-    tmp.remove();
+    svgContainer.innerHTML = '';
     return toast('Barkod oluşturulamadı', 'error');
   }
-  const svgHtml = tmp.outerHTML;
-  tmp.remove();
 
-  const priceLine = price !== '' && price != null ? '<div style="font-size:13px;margin-top:6px;">Satış: ₺' + price + '</div>' : '';
-  const htmlDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiket - ' + name.replace(/</g,'') + '</title>' +
-    '<style>@page{margin:8mm;size:auto}body{font-family:system-ui,sans-serif;text-align:center;margin:0;padding:12px;color:#000;background:#fff}.name{font-size:15px;font-weight:700;margin-bottom:10px}svg{max-width:100%;height:auto}</style></head><body>' +
-    '<div class="name">' + name.replace(/</g,'&lt;') + '</div>' + svgHtml + priceLine +
-    '<div style="margin-top:16px;"><button onclick="window.print()" style="padding:8px 16px;font-size:14px;cursor:pointer;">Yazdır</button> ' +
-    '<button onclick="window.close()" style="padding:8px 16px;font-size:14px;cursor:pointer;">Kapat</button></div>' +
-    '</body></html>';
-
-  // Yeni pencerede aç (uygulama kapanmasın)
-  const w = window.open('', '_blank', 'width=420,height=380,noopener,noreferrer');
-  if (!w) {
-    toast('Pop-up engellendi. Tarayıcıda pop-up izni verin.', 'error');
-    return;
+  document.getElementById('print-label-name').textContent = name;
+  const priceEl = document.getElementById('print-label-price');
+  if (price !== '' && price != null) {
+    priceEl.textContent = 'Satış: ₺' + price;
+    priceEl.style.display = 'block';
+  } else {
+    priceEl.textContent = '';
+    priceEl.style.display = 'none';
   }
-  w.document.open();
-  w.document.write(htmlDoc);
-  w.document.close();
+
+  // Yazdır (popup yok, aynı pencere)
+  setTimeout(function() {
+    window.print();
+  }, 150);
 };
 
 const _prevEditProduct = window.editProduct;
