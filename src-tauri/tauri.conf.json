@@ -12,7 +12,8 @@
         "title": "Stok Takip",
         "width": 1100,
         "height": 700,
-        "resizable": true
+        "resizable": true,
+        "maximized": true
       }
     ],
     "security": {
