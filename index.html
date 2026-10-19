@@ -438,8 +438,12 @@
           <input id="p-sell" type="number" step="0.01" placeholder="0.00">
         </div>
         <div class="field">
-          <label for="p-min">Min. Stok Seviyesi</label>
-          <input id="p-min" type="number" placeholder="0" value="0">
+          <label for="p-stock">Mevcut Stok</label>
+          <input id="p-stock" type="number" step="any" placeholder="0" value="0">
+        </div>
+        <div class="field">
+          <label for="p-min">Min. Stok (Uyarı Limiti)</label>
+          <input id="p-min" type="number" step="any" placeholder="0" value="0">
         </div>
         <div class="field field-actions">
           <label>&nbsp;</label>
@@ -650,6 +654,7 @@ window.editProduct = function(p) {
   document.getElementById('p-unit').value = p.unit;
   document.getElementById('p-buy').value = p.buy_price;
   document.getElementById('p-sell').value = p.sell_price;
+  document.getElementById('p-stock').value = p.current_stock;
   document.getElementById('p-min').value = p.min_stock_level;
   document.getElementById('p-name').focus();
 };
@@ -657,6 +662,7 @@ window.editProduct = function(p) {
 window.resetProductForm = function() {
   ['p-id','p-name','p-barcode','p-sku','p-buy','p-sell'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-unit').value = 'adet';
+  document.getElementById('p-stock').value = '0';
   document.getElementById('p-min').value = '0';
 };
 
@@ -664,6 +670,7 @@ window.saveProduct = async function() {
   const name = document.getElementById('p-name').value.trim();
   if (!name) return toast('Ürün adı zorunlu', 'error');
   const id = document.getElementById('p-id').value;
+  const newStock = +document.getElementById('p-stock').value || 0;
   const payload = {
     name,
     barcode: document.getElementById('p-barcode').value.trim() || null,
@@ -676,9 +683,14 @@ window.saveProduct = async function() {
   try {
     if (id) {
       await invoke('update_product', { p: { id: +id, ...payload } });
-      toast('Ürün güncellendi');
+      // Stok değiştiyse düzeltme kaydı oluştur
+      await invoke('adjust_stock', { productId: +id, newQuantity: newStock, notes: 'Ürün düzenlemeden stok güncelleme' });
+      toast('Ürün ve stok güncellendi');
     } else {
-      await invoke('create_product', { p: payload });
+      const newId = await invoke('create_product', { p: payload });
+      if (newStock > 0) {
+        await invoke('stock_in', { productId: newId, quantity: newStock, unitPrice: payload.buy_price || null, referenceNo: null, notes: 'İlk stok girişi' });
+      }
       toast('Ürün eklendi');
     }
     resetProductForm();
