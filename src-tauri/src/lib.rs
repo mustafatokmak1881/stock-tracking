@@ -381,7 +381,6 @@ fn export_products_csv() -> Result<String, AppError> {
         "SELECT id, sku, barcode, name, unit, buy_price, sell_price, min_stock_level, current_stock FROM products ORDER BY name"
     )?;
 
-    // UTF-8 BOM so Excel opens Turkish characters correctly
     let mut csv = String::from("\u{feff}id,sku,barcode,name,unit,buy_price,sell_price,min_stock_level,current_stock\n");
 
     let rows = stmt.query_map([], |row| {
@@ -407,7 +406,22 @@ fn export_products_csv() -> Result<String, AppError> {
         ));
     }
 
-    Ok(csv)
+    // Kullanıcının kaydetme yerini seçmesi için native dialog
+    let path = rfd::FileDialog::new()
+        .set_title("Ürün Listesini CSV Olarak Kaydet")
+        .set_file_name("stok-urunler.csv")
+        .add_filter("CSV Dosyası", &["csv"])
+        .save_file();
+
+    let path = match path {
+        Some(p) => p,
+        None => return Err(AppError::Other("Kayıt iptal edildi".into())),
+    };
+
+    std::fs::write(&path, csv.as_bytes())
+        .map_err(|e| AppError::Other(format!("Dosya yazılamadı: {}", e)))?;
+
+    Ok(path.to_string_lossy().to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

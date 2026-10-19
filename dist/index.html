@@ -1014,20 +1014,15 @@ async function loadReport() {
 
 window.exportCsv = async function() {
   try {
-    const csv = await invoke('export_products_csv');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const ts = new Date().toISOString().slice(0,19).replace(/[:T]/g, '-');
-    a.href = url;
-    a.download = 'stok-urunler-' + ts + '.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('CSV indirme başlatıldı — kaydedilecek yeri seçin');
+    const path = await invoke('export_products_csv');
+    toast('CSV kaydedildi: ' + path, 'success');
   } catch (e) {
-    toast(String(e), 'error');
+    const msg = String(e);
+    if (msg.includes('iptal')) {
+      toast('Kayıt iptal edildi');
+    } else {
+      toast(msg, 'error');
+    }
   }
 };
 
