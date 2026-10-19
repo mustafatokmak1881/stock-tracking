@@ -612,7 +612,7 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-<script type="module">
+<script>
 function getInvoke() {
   if (window.__TAURI__?.core?.invoke) return window.__TAURI__.core.invoke;
   if (window.__TAURI_INTERNALS__?.invoke) return window.__TAURI_INTERNALS__.invoke;
@@ -693,14 +693,30 @@ async function refreshDashboard() {
 
 async function loadProducts() {
   try {
-    const q = document.getElementById('product-search')?.value || null;
-    const products = await invoke('list_products', { search: q });
+    const raw = document.getElementById('product-search')?.value || '';
+    const q = raw.trim();
+    // Backend'e her zaman string gönder (null yerine boş string)
+    const products = await invoke('list_products', { search: q || null });
     const tbody = document.getElementById('product-tbody');
-    if (!products.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="muted">Henüz ürün eklenmemiş</td></tr>';
+
+    // Client-side filtre (ekstra güvenlik)
+    let filtered = products;
+    if (q) {
+      const lower = q.toLowerCase();
+      filtered = products.filter(p =>
+        (p.name && p.name.toLowerCase().includes(lower)) ||
+        (p.barcode && p.barcode.toLowerCase().includes(lower)) ||
+        (p.sku && p.sku.toLowerCase().includes(lower))
+      );
+    }
+
+    if (!filtered.length) {
+      tbody.innerHTML = q
+        ? '<tr><td colspan="6" class="muted">Aramanızla eşleşen ürün bulunamadı</td></tr>'
+        : '<tr><td colspan="6" class="muted">Henüz ürün eklenmemiş</td></tr>';
       return;
     }
-    tbody.innerHTML = products.map(p => `
+    tbody.innerHTML = filtered.map(p => `
       <tr>
         <td>${p.barcode || '—'}</td>
         <td><strong>${p.name}</strong></td>
@@ -715,6 +731,7 @@ async function loadProducts() {
       </tr>
     `).join('');
   } catch (e) {
+    console.error(e);
     toast(String(e), 'error');
   }
 }
