@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Takip</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --text: #1a1d23;
+    --text-secondary: #5c6578;
+    --muted: #8b93a7;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --danger: #dc2626;
+    --danger-soft: #fef2f2;
+    --success: #16a34a;
+    --success-soft: #f0fdf4;
+    --warning: #d97706;
+    --border: #e5e9f0;
+    --border-strong: #d1d5db;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  /* Header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1.5rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: var(--shadow);
+  }
+
+  .logo {
+    font-size: 1.15rem;
+    font-weight: 650;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .logo span {
+    background: var(--primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+  }
+
+  nav {
+    display: flex;
+    gap: .25rem;
+  }
+
+  nav button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: .45rem .9rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: all .15s;
+  }
+
+  nav button:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  nav button.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  /* Main */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: .95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.15rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-top: .15rem;
+  }
+
+  /* Alert */
+  .alert {
+    border-left: 4px solid var(--danger);
+    background: var(--danger-soft);
+  }
+
+  .alert-ok {
+    border-left: 4px solid var(--success);
+    background: var(--success-soft);
+  }
+
+  /* Forms */
+  .form-row {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  input, select {
+    padding: .5rem .75rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: .875rem;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  input::placeholder {
+    color: var(--muted);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text);
+    font-size: .875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .btn:hover {
+    background: var(--bg);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: #fff;
+  }
+
+  .btn-sm {
+    padding: .28rem .55rem;
+    font-size: .8rem;
+  }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-align: left;
+    padding: .65rem .75rem;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+  }
+
+  td {
+    padding: .7rem .75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: .875rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: #f8fafc;
+  }
+
+  /* Grid */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    nav { display: none; }
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: .75rem 1.25rem;
+    border-radius: var(--radius);
+    background: var(--text);
+    color: #fff;
+    font-size: .875rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    display: none;
+    z-index: 100;
+    max-width: 320px;
+  }
+
+  #toast.show { display: block; animation: slideIn .25s ease; }
+  #toast.error { background: var(--danger); }
+  #toast.success { background: var(--success); }
+
+  @keyframes slideIn {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .hidden { display: none !important; }
+
+  .muted { color: var(--muted); font-size: .85rem; }
+
+  kbd {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: .1rem .4rem;
+    font-size: .75rem;
+    font-family: inherit;
+    color: var(--text-secondary);
+  }
+
+  .barcode-result {
+    margin-top: .75rem;
+    padding: .75rem 1rem;
+    background: var(--primary-soft);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    font-weight: 500;
+    display: none;
+  }
+
+  .barcode-result.show { display: block; }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+  .field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .field-actions {
+    min-width: 180px;
+  }
+  .field input {
+    width: 100%;
+  }
+
+  .barcode-preview-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    text-align: center;
+    display: none;
+  }
+  .barcode-preview-box.show { display: block; }
+  .barcode-preview-box svg { max-width: 100%; height: auto; }
+  .barcode-actions { display: flex; gap: .5rem; justify-content: center; margin-top: .75rem; flex-wrap: wrap; }
+  @media print {
+    body * { visibility: hidden; }
+    #print-label, #print-label * { visibility: visible; }
+    #print-label {
+      position: absolute; left: 0; top: 0; width: 100%;
+      text-align: center; padding: 1rem;
+    }
+  }
+  #print-label { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span>S</span> Stok Takip</div>
+  <nav>
+    <button class="active" data-view="dashboard">Dashboard</button>
+    <button data-view="products">Ürünler</button>
+    <button data-view="stock">Stok İşlem</button>
+    <button data-view="history">Hareketler</button>
+    <button data-view="reports">Raporlar</button>
+  </nav>
+</header>
+
+<main>
+  <div id="toast"></div>
+
+  <!-- DASHBOARD -->
+  <section id="view-dashboard" class="view">
+    <div class="stats" id="stats-box">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-products">0</div>
+        <div class="stat-label">Toplam Ürün</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-low">0</div>
+        <div class="stat-label">Kritik Stok</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-cost">₺0</div>
+        <div class="stat-label">Toplam Maliyet</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-sell">₺0</div>
+        <div class="stat-label">Potansiyel Satış</div>
+      </div>
+    </div>
+
+    <div class="card" id="low-stock-box">
+      <div class="card-title">Kritik Stok Uyarıları</div>
+      <div class="muted">Kritik stok bulunmuyor</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Hızlı Barkod Arama</div>
+      <div class="form-row">
+        <input id="barcode-search" placeholder="Barkod okutun veya yazın..." style="min-width:260px;flex:1" autofocus>
+        <button class="btn btn-primary" onclick="searchBarcode()">Ara</button>
+      </div>
+      <div id="barcode-result" class="barcode-result"></div>
+      <p class="muted" style="margin-top:.75rem">
+        Kısayollar: <kbd>F2</kbd> Yeni Ürün &nbsp; <kbd>F4</kbd> Barkod Odak &nbsp; <kbd>F5</kbd> Yenile
+      </p>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section id="view-products" class="view hidden">
+    <div class="card">
+      <div class="card-title">Ürün Ekle / Düzenle</div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="p-name">Ürün Adı *</label>
+          <input id="p-name" placeholder="Örn: Ebru Kolonya">
+        </div>
+        <div class="field">
+          <label for="p-barcode">Barkod</label>
+          <div class="form-row" style="gap:.35rem">
+            <input id="p-barcode" placeholder="Barkod numarası" style="flex:1" oninput="updateBarcodePreview()">
+            <button type="button" class="btn btn-sm" onclick="generateBarcode()" title="Otomatik barkod oluştur">Oluştur</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="p-sku">SKU / Stok Kodu</label>
+          <input id="p-sku" placeholder="İç kod">
+        </div>
+        <div class="field">
+          <label for="p-unit">Birim</label>
+          <input id="p-unit" placeholder="adet, kg, lt..." value="adet">
+        </div>
+        <div class="field">
+          <label for="p-buy">Alış Fiyatı (₺)</label>
+          <input id="p-buy" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="p-sell">Satış Fiyatı (₺)</label>
+          <input id="p-sell" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="p-stock">Mevcut Stok</label>
+          <input id="p-stock" type="number" step="any" placeholder="0" value="0">
+        </div>
+        <div class="field">
+          <label for="p-min">Min. Stok (Uyarı Limiti)</label>
+          <input id="p-min" type="number" step="any" placeholder="0" value="0">
+        </div>
+        <div class="field field-actions">
+          <label>&nbsp;</label>
+          <div class="form-row">
+            <button class="btn btn-primary" onclick="saveProduct()">Kaydet</button>
+            <button class="btn" onclick="resetProductForm()">Temizle</button>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="p-id">
+      <div id="barcode-preview-box" class="barcode-preview-box">
+        <svg id="barcode-svg"></svg>
+        <div class="barcode-actions">
+          <button type="button" class="btn btn-primary btn-sm" onclick="printBarcodeLabel()">Etiket Yazdır</button>
+        </div>
+      </div>
+      <div id="print-label">
+        <div id="print-name" style="font-size:14px;font-weight:600;margin-bottom:8px"></div>
+        <svg id="print-barcode-svg"></svg>
+        <div id="print-code" style="font-size:12px;margin-top:4px;letter-spacing:1px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-row" style="margin-bottom:1rem">
+        <input id="product-search" placeholder="Ürünlerde ara (ad, barkod, SKU)..." style="flex:1;min-width:220px" oninput="loadProducts()">
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Barkod</th>
+            <th>Ürün Adı</th>
+            <th>Stok</th>
+            <th>Alış</th>
+            <th>Satış</th>
+            <th>İşlem</th>
+          </tr>
+        </thead>
+        <tbody id="product-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- STOCK -->
+  <section id="view-stock" class="view hidden">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Stok Giriş</div>
+        <div class="form-row">
+          <input id="in-barcode" placeholder="Barkod">
+          <input id="in-qty" type="number" placeholder="Miktar" value="1" style="width:90px">
+          <input id="in-price" type="number" step="0.01" placeholder="Alış fiyatı" style="width:110px">
+          <input id="in-ref" placeholder="Fiş / Fatura no">
+          <button class="btn btn-primary" onclick="doStockIn()">Giriş Yap</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Stok Çıkış</div>
+        <div class="form-row">
+          <input id="out-barcode" placeholder="Barkod">
+          <input id="out-qty" type="number" placeholder="Miktar" value="1" style="width:90px">
+          <input id="out-ref" placeholder="Fiş no">
+          <button class="btn btn-primary" onclick="doStockOut()">Çıkış Yap</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Sayım / Stok Düzeltme</div>
+      <div class="form-row">
+        <input id="adj-barcode" placeholder="Barkod">
+        <input id="adj-qty" type="number" placeholder="Yeni miktar" style="width:110px">
+        <input id="adj-notes" placeholder="Not (fire, kayıp, fazlalık...)" style="flex:1;min-width:180px">
+        <button class="btn btn-primary" onclick="doAdjust()">Düzelt</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="view-history" class="view hidden">
+    <div class="card">
+      <div class="card-title">Son Stok Hareketleri</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Tarih</th>
+            <th>Ürün</th>
+            <th>İşlem</th>
+            <th>Miktar</th>
+            <th>Fiyat</th>
+            <th>Not / Referans</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REPORTS -->
+  <section id="view-reports" class="view hidden">
+    <div class="stats" id="report-stats"></div>
+    <div class="card">
+      <div class="card-title">Dışa Aktar</div>
+      <button class="btn btn-primary" onclick="exportCsv()">Ürün Listesini CSV İndir</button>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script type="module">
+function getInvoke() {
+  if (window.__TAURI__?.core?.invoke) return window.__TAURI__.core.invoke;
+  if (window.__TAURI_INTERNALS__?.invoke) return window.__TAURI_INTERNALS__.invoke;
+  return null;
+}
+
+const invoke = getInvoke();
+if (!invoke) {
+  document.body.innerHTML = `
+    <div style="max-width:520px;margin:4rem auto;padding:2rem;font-family:system-ui;text-align:center">
+      <h2 style="margin-bottom:1rem">Tauri API bulunamadı</h2>
+      <p style="color:#5c6578;margin-bottom:1.5rem">Bu sayfayı doğrudan tarayıcıda açmış olabilirsiniz.</p>
+      <pre style="background:#f4f6f9;padding:1rem;border-radius:8px;text-align:left;font-size:.85rem">cd stock-tracking-mvp
+npm install
+npm run dev</pre>
+    </div>`;
+  throw new Error('Tauri API yok');
+}
+
+function toast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  setTimeout(() => el.className = '', 2800);
+}
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  document.getElementById('view-' + name).classList.remove('hidden');
+  document.querySelectorAll('nav button[data-view]').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === name);
+  });
+  if (name === 'dashboard') refreshDashboard();
+  if (name === 'products') loadProducts();
+  if (name === 'history') loadHistory();
+  if (name === 'reports') loadReport();
+}
+
+document.querySelectorAll('nav button[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => showView(btn.dataset.view));
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    if (e.key === 'Enter' && e.target.id === 'barcode-search') {
+      e.preventDefault();
+      searchBarcode();
+    }
+    return;
+  }
+  if (e.key === 'F2') { e.preventDefault(); showView('products'); document.getElementById('p-name').focus(); }
+  if (e.key === 'F4') { e.preventDefault(); showView('dashboard'); document.getElementById('barcode-search').focus(); }
+  if (e.key === 'F5') { e.preventDefault(); refreshDashboard(); loadProducts(); }
+});
+
+async function refreshDashboard() {
+  try {
+    const report = await invoke('stock_value_report');
+    document.getElementById('stat-products').textContent = report.product_count;
+    document.getElementById('stat-low').textContent = report.low_stock_count;
+    document.getElementById('stat-cost').textContent = '₺' + report.total_cost.toFixed(2);
+    document.getElementById('stat-sell').textContent = '₺' + report.total_sell_value.toFixed(2);
+
+    const low = await invoke('low_stock_products');
+    const box = document.getElementById('low-stock-box');
+    if (!low.length) {
+      box.className = 'card alert-ok';
+      box.innerHTML = '<div class="card-title">Kritik Stok Uyarıları</div><div class="muted">Kritik stok bulunmuyor</div>';
+    } else {
+      box.className = 'card alert';
+      box.innerHTML = '<div class="card-title">Kritik Stok Uyarıları</div>' +
+        low.map(p => `<div style="margin-bottom:.35rem"><strong>${p.name}</strong> — ${p.current_stock} ${p.unit} <span class="muted">(min: ${p.min_stock_level})</span></div>`).join('');
+    }
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+}
+
+async function loadProducts() {
+  try {
+    const q = document.getElementById('product-search')?.value || null;
+    const products = await invoke('list_products', { search: q });
+    const tbody = document.getElementById('product-tbody');
+    if (!products.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">Henüz ürün eklenmemiş</td></tr>';
+      return;
+    }
+    tbody.innerHTML = products.map(p => `
+      <tr>
+        <td>${p.barcode || '—'}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.current_stock} ${p.unit}</td>
+        <td>₺${p.buy_price}</td>
+        <td>₺${p.sell_price}</td>
+        <td>
+          <button class="btn btn-sm" onclick='editProduct(${JSON.stringify(p)})'>Düzenle</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Sil</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+}
+
+window.editProduct = function(p) {
+  document.getElementById('p-id').value = p.id;
+  document.getElementById('p-name').value = p.name;
+  document.getElementById('p-barcode').value = p.barcode || '';
+  document.getElementById('p-sku').value = p.sku || '';
+  document.getElementById('p-unit').value = p.unit;
+  document.getElementById('p-buy').value = p.buy_price;
+  document.getElementById('p-sell').value = p.sell_price;
+  document.getElementById('p-stock').value = p.current_stock;
+  document.getElementById('p-min').value = p.min_stock_level;
+  document.getElementById('p-name').focus();
+};
+
+window.resetProductForm = function() {
+  ['p-id','p-name','p-barcode','p-sku','p-buy','p-sell'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('p-unit').value = 'adet';
+  document.getElementById('p-stock').value = '0';
+  document.getElementById('p-min').value = '0';
+};
+
+window.saveProduct = async function() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) return toast('Ürün adı zorunlu', 'error');
+  const id = document.getElementById('p-id').value;
+  const newStock = +document.getElementById('p-stock').value || 0;
+  const payload = {
+    name,
+    barcode: document.getElementById('p-barcode').value.trim() || null,
+    sku: document.getElementById('p-sku').value.trim() || null,
+    unit: document.getElementById('p-unit').value.trim() || 'adet',
+    buy_price: +document.getElementById('p-buy').value || 0,
+    sell_price: +document.getElementById('p-sell').value || 0,
+    min_stock_level: +document.getElementById('p-min').value || 0
+  };
+  try {
+    if (id) {
+      await invoke('update_product', { p: { id: +id, ...payload } });
+      // Stok değiştiyse düzeltme kaydı oluştur
+      await invoke('adjust_stock', { productId: +id, newQuantity: newStock, notes: 'Ürün düzenlemeden stok güncelleme' });
+      toast('Ürün ve stok güncellendi');
+    } else {
+      const newId = await invoke('create_product', { p: payload });
+      if (newStock > 0) {
+        await invoke('stock_in', { productId: newId, quantity: newStock, unitPrice: payload.buy_price || null, referenceNo: null, notes: 'İlk stok girişi' });
+      }
+      toast('Ürün eklendi');
+    }
+    resetProductForm();
+    loadProducts();
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+};
+
+window.deleteProduct = async function(id) {
+  if (!confirm('Bu ürünü silmek istediğinize emin misiniz?')) return;
+  try {
+    await invoke('delete_product', { id });
+    toast('Ürün silindi');
+    loadProducts();
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+};
+
+async function findByBarcode(barcode) {
+  return await invoke('get_product_by_barcode', { barcode });
+}
+
+window.searchBarcode = async function() {
+  const barcode = document.getElementById('barcode-search').value.trim();
+  if (!barcode) return;
+  const resultEl = document.getElementById('barcode-result');
+  try {
+    const p = await findByBarcode(barcode);
+    resultEl.innerHTML = `<strong>${p.name}</strong> &nbsp; Stok: ${p.current_stock} ${p.unit} &nbsp;·&nbsp; Alış: ₺${p.buy_price} &nbsp;·&nbsp; Satış: ₺${p.sell_price}`;
+    resultEl.classList.add('show');
+    document.getElementById('barcode-search').select();
+  } catch {
+    resultEl.textContent = 'Ürün bulunamadı: ' + barcode;
+    resultEl.classList.add('show');
+  }
+};
+
+window.doStockIn = async function() {
+  const barcode = document.getElementById('in-barcode').value.trim();
+  const qty = +document.getElementById('in-qty').value;
+  if (!barcode || !qty || qty <= 0) return toast('Barkod ve miktar gerekli', 'error');
+  try {
+    const p = await findByBarcode(barcode);
+    await invoke('stock_in', {
+      productId: p.id,
+      quantity: qty,
+      unitPrice: +document.getElementById('in-price').value || null,
+      referenceNo: document.getElementById('in-ref').value.trim() || null,
+      notes: null
+    });
+    toast(`Giriş yapıldı: ${p.name} +${qty}`);
+    document.getElementById('in-barcode').value = '';
+    document.getElementById('in-barcode').focus();
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+};
+
+window.doStockOut = async function() {
+  const barcode = document.getElementById('out-barcode').value.trim();
+  const qty = +document.getElementById('out-qty').value;
+  if (!barcode || !qty || qty <= 0) return toast('Barkod ve miktar gerekli', 'error');
+  try {
+    const p = await findByBarcode(barcode);
+    await invoke('stock_out', {
+      productId: p.id,
+      quantity: qty,
+      referenceNo: document.getElementById('out-ref').value.trim() || null,
+      notes: null
+    });
+    toast(`Çıkış yapıldı: ${p.name} −${qty}`);
+    document.getElementById('out-barcode').value = '';
+    document.getElementById('out-barcode').focus();
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+};
+
+window.doAdjust = async function() {
+  const barcode = document.getElementById('adj-barcode').value.trim();
+  const qty = +document.getElementById('adj-qty').value;
+  if (!barcode || isNaN(qty)) return toast('Barkod ve yeni miktar gerekli', 'error');
+  try {
+    const p = await findByBarcode(barcode);
+    await invoke('adjust_stock', {
+      productId: p.id,
+      newQuantity: qty,
+      notes: document.getElementById('adj-notes').value.trim() || null
+    });
+    toast(`Düzeltme: ${p.name} → ${qty}`);
+    document.getElementById('adj-barcode').value = '';
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+};
+
+async function loadHistory() {
+  try {
+    const list = await invoke('list_transactions', { limit: 100 });
+    const tbody = document.getElementById('history-tbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="muted">Henüz hareket yok</td></tr>';
+      return;
+    }
+    const typeMap = { in: 'Giriş', out: 'Çıkış', adjustment: 'Düzeltme' };
+    tbody.innerHTML = list.map(t => `
+      <tr>
+        <td>${t.created_at}</td>
+        <td>${t.product_name}</td>
+        <td>${typeMap[t.transaction_type] || t.transaction_type}</td>
+        <td>${t.quantity}</td>
+        <td>${t.unit_price != null ? '₺' + t.unit_price : '—'}</td>
+        <td>${t.notes || t.reference_no || '—'}</td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+}
+
+async function loadReport() {
+  try {
+    const r = await invoke('stock_value_report');
+    document.getElementById('report-stats').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${r.product_count}</div><div class="stat-label">Toplam Ürün</div></div>
+      <div class="stat-card"><div class="stat-value">${r.low_stock_count}</div><div class="stat-label">Kritik Stok</div></div>
+      <div class="stat-card"><div class="stat-value">₺${r.total_cost.toFixed(2)}</div><div class="stat-label">Toplam Maliyet</div></div>
+      <div class="stat-card"><div class="stat-value">₺${r.total_sell_value.toFixed(2)}</div><div class="stat-label">Potansiyel Satış</div></div>
+    `;
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+}
+
+window.exportCsv = async function() {
+  try {
+    const path = await invoke('export_products_csv');
+    toast('CSV kaydedildi: ' + path);
+  } catch (e) {
+    toast(String(e), 'error');
+  }
+};
+
+function ean13CheckDigit(digits12) {
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(digits12[i], 10) * (i % 2 === 0 ? 1 : 3);
+  }
+  return String((10 - (sum % 10)) % 10);
+}
+
+window.generateBarcode = function() {
+  const ts = Date.now().toString();
+  const base = ('2' + ts.slice(-11)).slice(0, 12);
+  const code = base + ean13CheckDigit(base);
+  document.getElementById('p-barcode').value = code;
+  updateBarcodePreview();
+  toast('Barkod oluşturuldu: ' + code);
+};
+
+window.updateBarcodePreview = function() {
+  const code = document.getElementById('p-barcode').value.trim();
+  const box = document.getElementById('barcode-preview-box');
+  if (!code || code.length < 4) {
+    box.classList.remove('show');
+    return;
+  }
+  try {
+    const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
+    JsBarcode('#barcode-svg', code, {
+      format: format,
+      width: 2,
+      height: 60,
+      displayValue: true,
+      fontSize: 14,
+      margin: 8,
+      background: '#ffffff',
+      lineColor: '#1a1d23'
+    });
+    box.classList.add('show');
+  } catch (err) {
+    box.classList.remove('show');
+  }
+};
+
+window.printBarcodeLabel = function() {
+  const code = document.getElementById('p-barcode').value.trim();
+  const name = document.getElementById('p-name').value.trim() || 'Ürün';
+  if (!code) return toast('Önce barkod girin veya oluşturun', 'error');
+  try {
+    const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
+    JsBarcode('#print-barcode-svg', code, {
+      format: format,
+      width: 2,
+      height: 50,
+      displayValue: false,
+      margin: 4,
+      background: '#ffffff',
+      lineColor: '#000000'
+    });
+    document.getElementById('print-name').textContent = name;
+    document.getElementById('print-code').textContent = code;
+    window.print();
+  } catch (err) {
+    toast('Barkod yazdırılamadı', 'error');
+  }
+};
+
+const _prevEditProduct = window.editProduct;
+window.editProduct = function(p) {
+  if (typeof _prevEditProduct === 'function') _prevEditProduct(p);
+  setTimeout(function() { updateBarcodePreview(); }, 50);
+};
+
+
+refreshDashboard();
+</script>
+</body>
+</html>
