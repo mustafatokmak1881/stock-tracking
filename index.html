@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stok Takip</title>
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--text:#f1f5f9;--muted:#94a3b8;--primary:#3b82f6;--danger:#ef4444;--success:#22c55e;--border:#334155}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:1.25rem;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;gap:1rem}
+h1{font-size:1.35rem;font-weight:600}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem}
+.alert{border-left:4px solid var(--danger)}
+table{width:100%;border-collapse:collapse}
+th,td{padding:.5rem .7rem;border-bottom:1px solid var(--border);text-align:left;font-size:.9rem}
+th{color:var(--muted);font-weight:500;font-size:.78rem}
+input,button{padding:.42rem .65rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.9rem}
+button{background:var(--primary);border:none;cursor:pointer;color:#fff}
+button:hover{filter:brightness(1.12)}
+.btn-sm{padding:.22rem .5rem;font-size:.82rem;margin-right:.25rem}
+.form-row{display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:.4rem;align-items:center}
+#error{color:var(--danger);margin-bottom:.75rem;min-height:1.2em;font-size:.9rem}
+.success{color:var(--success)}
+#barcode-search{min-width:180px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Stok Takip</h1>
+  <div class="form-row" style="margin:0">
+    <input id="barcode-search" placeholder="Barkod okut / ara..." autofocus>
+    <button onclick="searchBarcode()">Ara</button>
+  </div>
+</header>
+
+<div id="error"></div>
+<div id="alerts" class="card">Kritik stok yok</div>
+
+<div class="card">
+  <h3 style="margin-bottom:.7rem;font-size:1rem">Yeni Ürün</h3>
+  <div class="form-row">
+    <input id="name" placeholder="Ürün adı *">
+    <input id="barcode" placeholder="Barkod">
+    <input id="unit" placeholder="Birim" value="adet" style="width:70px">
+    <input id="buy" type="number" placeholder="Alış" step="0.01" style="width:85px">
+    <input id="sell" type="number" placeholder="Satış" step="0.01" style="width:85px">
+    <input id="min" type="number" placeholder="Min" value="0" style="width:70px">
+    <button onclick="addProduct()">Ekle</button>
+  </div>
+</div>
+
+<div class="card">
+  <h3 style="margin-bottom:.7rem;font-size:1rem">Ürünler</h3>
+  <table>
+    <thead>
+      <tr><th>Barkod</th><th>Ad</th><th>Stok</th><th>Satış</th><th>İşlem</th></tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script type="module">
+const { invoke } = window.__TAURI__.core;
+
+function showError(msg, isSuccess = false) {
+  const el = document.getElementById('error');
+  el.textContent = msg || '';
+  el.className = isSuccess ? 'success' : '';
+}
+
+async function loadProducts() {
+  try {
+    const products = await invoke('list_products');
+    renderTable(products);
+    const low = await invoke('low_stock_products');
+    renderAlerts(low);
+    showError('');
+  } catch (e) {
+    showError('Yükleme hatası: ' + e);
+  }
+}
+
+function renderTable(products) {
+  const tbody = document.getElementById('tbody');
+  if (!products.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">Henüz ürün yok</td></tr>';
+    return;
+  }
+  tbody.innerHTML = products.map(p => `
+    <tr>
+      <td>${p.barcode || '-'}</td>
+      <td>${p.name}</td>
+      <td>${p.current_stock} ${p.unit}</td>
+      <td>${p.sell_price}</td>
+      <td>
+        <button class="btn-sm" onclick="stockIn(${p.id})">+</button>
+        <button class="btn-sm" onclick="stockOut(${p.id})">−</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderAlerts(low) {
+  const el = document.getElementById('alerts');
+  if (!low.length) {
+    el.className = 'card';
+    el.textContent = 'Kritik stok yok';
+  } else {
+    el.className = 'card alert';
+    el.innerHTML = low.map(p =>
+      `<div style="margin-bottom:.25rem"><strong>${p.name}</strong> — kalan: ${p.current_stock} ${p.unit} (min: ${p.min_stock_level})</div>`
+    ).join('');
+  }
+}
+
+window.addProduct = async function () {
+  const name = document.getElementById('name').value.trim();
+  if (!name) return alert('Ürün adı zorunlu');
+  try {
+    await invoke('create_product', {
+      p: {
+        name,
+        barcode: document.getElementById('barcode').value.trim() || null,
+        unit: document.getElementById('unit').value.trim() || 'adet',
+        buy_price: +document.getElementById('buy').value || 0,
+        sell_price: +document.getElementById('sell').value || 0,
+        min_stock_level: +document.getElementById('min').value || 0
+      }
+    });
+    document.getElementById('name').value = '';
+    document.getElementById('barcode').value = '';
+    document.getElementById('buy').value = '';
+    document.getElementById('sell').value = '';
+    showError('Ürün eklendi', true);
+    await loadProducts();
+    document.getElementById('barcode-search').focus();
+  } catch (e) {
+    showError('Ekleme hatası: ' + e);
+  }
+};
+
+window.stockIn = async function (id) {
+  const qty = +prompt('Giriş miktarı', '1');
+  if (!qty || qty <= 0) return;
+  try {
+    await invoke('stock_in', { productId: id, quantity: qty, unitPrice: null, notes: null });
+    showError('Stok girişi yapıldı', true);
+    await loadProducts();
+  } catch (e) {
+    showError(String(e));
+  }
+};
+
+window.stockOut = async function (id) {
+  const qty = +prompt('Çıkış miktarı', '1');
+  if (!qty || qty <= 0) return;
+  try {
+    await invoke('stock_out', { productId: id, quantity: qty, notes: null });
+    showError('Stok çıkışı yapıldı', true);
+    await loadProducts();
+  } catch (e) {
+    showError(String(e));
+  }
+};
+
+window.searchBarcode = async function () {
+  const barcode = document.getElementById('barcode-search').value.trim();
+  if (!barcode) return;
+  try {
+    const p = await invoke('get_product_by_barcode', { barcode });
+    showError(`Bulundu: ${p.name} — Stok: ${p.current_stock} ${p.unit}`, true);
+    document.getElementById('barcode-search').select();
+  } catch (e) {
+    showError('Ürün bulunamadı: ' + barcode);
+  }
+};
+
+// Barkod okuyucu: Enter ile ara
+document.getElementById('barcode-search').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    searchBarcode();
+  }
+});
+
+loadProducts();
+</script>
+</body>
+</html>

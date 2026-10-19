@@ -1,0 +1,7 @@
+node_modules/
+dist/
+src-tauri/target/
+stock.db
+stock.db-*
+*.log
+.DS_Store

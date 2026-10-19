@@ -1,0 +1,25 @@
+{
+  "productName": "Stok Takip",
+  "version": "0.1.0",
+  "identifier": "com.stock.tracking",
+  "build": {
+    "frontendDist": ".."
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Stok Takip",
+        "width": 1100,
+        "height": 700,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all"
+  }
+}
