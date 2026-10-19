@@ -393,7 +393,6 @@
     transform: scale(0.97);
   }
   .btn-generate svg { flex-shrink: 0; }
-<<<<<<< HEAD
 
   .btn-barcode {
     background: #eff6ff;
@@ -407,8 +406,6 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
-=======
->>>>>>> 9eeca332f21c68e9f9266527f32a8dfe8b04e076
 </style>
 </head>
 <body>
@@ -954,7 +951,6 @@ window.updateBarcodePreview = function() {
   }
 };
 
-<<<<<<< HEAD
 
 window.printProductBarcode = function(p) {
   const code = (p.barcode || '').trim();
@@ -963,17 +959,6 @@ window.printProductBarcode = function(p) {
   if (!code) return toast('Bu ürünün barkodu yok', 'error');
 
   const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
-=======
-window.printBarcodeLabel = function() {
-  const code = document.getElementById('p-barcode').value.trim();
-  const name = document.getElementById('p-name').value.trim() || 'Ürün';
-  const price = document.getElementById('p-sell').value || '';
-  if (!code) return toast('Önce barkod girin veya oluşturun', 'error');
-
-  const format = (code.length === 13 && /^\d+$/.test(code)) ? 'EAN13' : 'CODE128';
-
-  // Geçici SVG üret
->>>>>>> 9eeca332f21c68e9f9266527f32a8dfe8b04e076
   const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   tmp.id = 'tmp-barcode-print';
   document.body.appendChild(tmp);
@@ -995,7 +980,6 @@ window.printBarcodeLabel = function() {
   const svgHtml = tmp.outerHTML;
   tmp.remove();
 
-<<<<<<< HEAD
   const priceLine = price !== '' && price != null ? '<div style="font-size:13px;margin-top:6px;">Satış: ₺' + price + '</div>' : '';
   const htmlDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Etiket - ' + name.replace(/</g,'') + '</title>' +
     '<style>@page{margin:8mm;size:auto}body{font-family:system-ui,sans-serif;text-align:center;margin:0;padding:12px;color:#000;background:#fff}.name{font-size:15px;font-weight:700;margin-bottom:10px}svg{max-width:100%;height:auto}</style></head><body>' +
