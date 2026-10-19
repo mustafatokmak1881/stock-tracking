@@ -1,29 +1,69 @@
 <!DOCTYPE html>
 <html lang%3D"tr">
 <head>
-  <meta charset%3D"UTF-8" %2F>
-  <meta name%3D"viewport" content%3D"width%3Ddevice-width%2C initial-scale%3D1.0" %2F>
-  <title>Stok Takip<%2Ftitle>
-  <link rel%3D"stylesheet" href%3D"%2Fstyles.css" %2F>
+<meta charset%3D"UTF-8">
+<meta name%3D"viewport" content%3D"width%3Ddevice-width%2C initial-scale%3D1">
+<title>Stok Takip MVP<%2Ftitle>
+<style>
+body{font-family%3Asystem-ui%3Bbackground%3A%230f172a%3Bcolor%3A%23f1f5f9%3Bmargin%3A0%3Bpadding%3A1rem}
+header{display%3Aflex%3Bjustify-content%3Aspace-between%3Balign-items%3Acenter%3Bmargin-bottom%3A1rem}
+h1{margin%3A0%3Bfont-size%3A1.4rem}
+.card{background%3A%231e293b%3Bborder%3A1px solid %23334155%3Bborder-radius%3A8px%3Bpadding%3A1rem%3Bmargin-bottom%3A1rem}
+.alert{border-left%3A4px solid %23ef4444}
+table{width%3A100%%3Bborder-collapse%3Acollapse}
+th%2Ctd{padding%3A.5rem%3Bborder-bottom%3A1px solid %23334155%3Btext-align%3Aleft}
+input%2Cselect%2Cbutton{padding%3A.4rem .6rem%3Bborder-radius%3A6px%3Bborder%3A1px solid %23334155%3Bbackground%3A%230f172a%3Bcolor%3A%23f1f5f9}
+button{background%3A%233b82f6%3Bborder%3Anone%3Bcursor%3Apointer}
+button%3Ahover{filter%3Abrightness(1.1)}
+.form-row{display%3Aflex%3Bgap%3A.5rem%3Bflex-wrap%3Awrap%3Bmargin-bottom%3A.5rem}
+<%2Fstyle>
 <%2Fhead>
 <body>
-  <div id%3D"app">
-    <header>
-      <h1>Stok Takip<%2Fh1>
-      <nav>
-        <button id%3D"btn-products">Ürünler<%2Fbutton>
-        <button id%3D"btn-stock-in">Stok Giriş<%2Fbutton>
-        <button id%3D"btn-stock-out">Stok Çıkış<%2Fbutton>
-        <button id%3D"btn-reports">Raporlar<%2Fbutton>
-      <%2Fnav>
-    <%2Fheader>
-    <main id%3D"main-content">
-      <section id%3D"dashboard">
-        <h2>Dashboard<%2Fh2>
-        <div id%3D"low-stock-alerts"><%2Fdiv>
-      <%2Fsection>
-    <%2Fmain>
+<header>
+  <h1>Stok Takip MVP<%2Fh1>
+<%2Fheader>
+<div id%3D"alerts" class%3D"card">Kritik stok yok<%2Fdiv>
+<div class%3D"card">
+  <h3>Yeni Ürün<%2Fh3>
+  <div class%3D"form-row">
+    <input id%3D"name" placeholder%3D"Ürün adı">
+    <input id%3D"barcode" placeholder%3D"Barkod">
+    <input id%3D"unit" placeholder%3D"Birim" value%3D"adet">
+    <input id%3D"buy" type%3D"number" placeholder%3D"Alış" step%3D"0.01">
+    <input id%3D"sell" type%3D"number" placeholder%3D"Satış" step%3D"0.01">
+    <input id%3D"min" type%3D"number" placeholder%3D"Min stok" value%3D"0">
+    <button onclick%3D"addProduct()">Ekle<%2Fbutton>
   <%2Fdiv>
-  <script type%3D"module" src%3D"%2Fmain.js"><%2Fscript>
+<%2Fdiv>
+<div class%3D"card">
+  <h3>Ürünler<%2Fh3>
+  <table>
+    <thead><tr><th>Barkod<%2Fth><th>Ad<%2Fth><th>Stok<%2Fth><th>Fiyat<%2Fth><th>İşlem<%2Fth><%2Ftr><%2Fthead>
+    <tbody id%3D"tbody"><%2Ftbody>
+  <%2Ftable>
+<%2Fdiv>
+<script>
+const KEY %3D 'stock_mvp'%3B
+function load(){return JSON.parse(localStorage.getItem(KEY)||'[]')}
+function save(d){localStorage.setItem(KEY%2CJSON.stringify(d))}
+function render(){
+const d%3Dload()%3B
+const tb%3Ddocument.getElementById('tbody')%3B
+tb.innerHTML%3Dd.map(p%3D>`<tr><td>%24{p.b||'-'}<%2Ftd><td>%24{p.n}<%2Ftd><td>%24{p.s} %24{p.u}<%2Ftd><td>%24{p.sp}<%2Ftd><td><button onclick%3D"in(%24{p.id})">%2B<%2Fbutton> <button onclick%3D"out(%24{p.id})">-<%2Fbutton><%2Ftd><%2Ftr>`).join('')%3B
+const low%3Dd.filter(p%3D>p.s<%3Dp.m)%3B
+document.getElementById('alerts').innerHTML%3Dlow.length%3Flow.map(p%3D>`<div class%3D"card alert">%24{p.n} kalan%3A %24{p.s}<%2Fdiv>`).join('')%3A'Kritik stok yok'%3B
+}
+function addProduct(){
+const n%3Ddocument.getElementById('name').value.trim()%3B
+if(!n)return alert('Ad gerekli')%3B
+const d%3Dload()%3B
+d.push({id%3ADate.now()%2Cb%3Adocument.getElementById('barcode').value.trim()%2Cn%2Cu%3Adocument.getElementById('unit').value||'adet'%2Cbp%3A%2Bdocument.getElementById('buy').value||0%2Csp%3A%2Bdocument.getElementById('sell').value||0%2Cm%3A%2Bdocument.getElementById('min').value||0%2Cs%3A0})%3B
+save(d)%3Brender()%3B
+document.getElementById('name').value%3D''%3B
+}
+function in(id){const q%3D%2Bprompt('Miktar'%2C1)%3Bif(!q||q<%3D0)return%3Bconst d%3Dload()%3Bconst p%3Dd.find(x%3D>x.id%3D%3D%3Did)%3Bif(p){p.s%2B%3Dq%3Bsave(d)%3Brender()}}
+function out(id){const q%3D%2Bprompt('Miktar'%2C1)%3Bif(!q||q<%3D0)return%3Bconst d%3Dload()%3Bconst p%3Dd.find(x%3D>x.id%3D%3D%3Did)%3Bif(p){if(p.s<q)return alert('Yetersiz')%3Bp.s-%3Dq%3Bsave(d)%3Brender()}}
+render()%3B
+<%2Fscript>
 <%2Fbody>
 <%2Fhtml>
