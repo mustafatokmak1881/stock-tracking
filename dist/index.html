@@ -600,31 +600,34 @@
       <div class="card">
         <div class="card-title">Stok Giriş</div>
         <div class="form-row">
-          <input id="in-barcode" placeholder="Barkod">
+          <input id="in-barcode" placeholder="Barkod" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupStockBarcode('in');}" onblur="lookupStockBarcode('in')">
           <input id="in-qty" type="number" placeholder="Miktar" value="1" style="width:90px">
           <input id="in-price" type="number" step="0.01" placeholder="Alış fiyatı" style="width:110px">
           <input id="in-ref" placeholder="Fiş / Fatura no">
           <button class="btn btn-primary" onclick="doStockIn()">Giriş Yap</button>
         </div>
+        <div id="in-info" class="muted" style="margin-top:0.5rem;min-height:1.2em;"></div>
       </div>
       <div class="card">
         <div class="card-title">Stok Çıkış</div>
         <div class="form-row">
-          <input id="out-barcode" placeholder="Barkod">
+          <input id="out-barcode" placeholder="Barkod" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupStockBarcode('out');}" onblur="lookupStockBarcode('out')">
           <input id="out-qty" type="number" placeholder="Miktar" value="1" style="width:90px">
           <input id="out-ref" placeholder="Fiş no">
           <button class="btn btn-primary" onclick="doStockOut()">Çıkış Yap</button>
         </div>
+        <div id="out-info" class="muted" style="margin-top:0.5rem;min-height:1.2em;"></div>
       </div>
     </div>
     <div class="card">
       <div class="card-title">Sayım / Stok Düzeltme</div>
       <div class="form-row">
-        <input id="adj-barcode" placeholder="Barkod">
+        <input id="adj-barcode" placeholder="Barkod" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupStockBarcode('adj');}" onblur="lookupStockBarcode('adj')">
         <input id="adj-qty" type="number" placeholder="Yeni miktar" style="width:110px">
         <input id="adj-notes" placeholder="Not (fire, kayıp, fazlalık...)" style="flex:1;min-width:180px">
         <button class="btn btn-primary" onclick="doAdjust()">Düzelt</button>
       </div>
+      <div id="adj-info" class="muted" style="margin-top:0.5rem;min-height:1.2em;"></div>
     </div>
   </section>
 
@@ -871,6 +874,44 @@ window.searchBarcode = async function() {
   } catch {
     resultEl.textContent = 'Ürün bulunamadı: ' + barcode;
     resultEl.classList.add('show');
+  }
+};
+
+
+window.lookupStockBarcode = async function(prefix) {
+  const input = document.getElementById(prefix + '-barcode');
+  const info = document.getElementById(prefix + '-info');
+  if (!input || !info) return;
+  const barcode = input.value.trim();
+  if (!barcode) {
+    info.textContent = '';
+    info.style.color = '';
+    return;
+  }
+  try {
+    const p = await findByBarcode(barcode);
+    info.style.color = 'var(--success, #16a34a)';
+    info.innerHTML = '<strong>' + p.name + '</strong> &nbsp;·&nbsp; Stok: ' + p.current_stock + ' ' + p.unit +
+      ' &nbsp;·&nbsp; Alış: ₺' + p.buy_price + ' &nbsp;·&nbsp; Satış: ₺' + p.sell_price;
+    if (prefix === 'in') {
+      const priceEl = document.getElementById('in-price');
+      if (priceEl && !priceEl.value) priceEl.value = p.buy_price;
+    }
+    if (prefix === 'adj') {
+      const qtyEl = document.getElementById('adj-qty');
+      if (qtyEl && !qtyEl.value) qtyEl.placeholder = 'Mevcut: ' + p.current_stock;
+    }
+  } catch (e) {
+    info.style.color = 'var(--danger, #dc2626)';
+    info.textContent = 'Ürün bulunamadı: ' + barcode;
+    if (confirm('Bu barkoda ait ürün yok.\n\nYeni ürün oluşturulsun mu?')) {
+      showView('products');
+      resetProductForm();
+      document.getElementById('p-barcode').value = barcode;
+      if (typeof updateBarcodePreview === 'function') updateBarcodePreview();
+      document.getElementById('p-name').focus();
+      toast('Barkod forma yazıldı — ürün bilgilerini girip Kaydet', 'success');
+    }
   }
 };
 
