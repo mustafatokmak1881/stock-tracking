@@ -5,9 +5,8 @@
   "type": "module",
   "scripts": {
     "tauri": "tauri",
-    "dev": "node -e \"const fs=require('fs');if(!fs.existsSync('dist'))fs.mkdirSync('dist');if(fs.existsSync('index.html'))fs.copyFileSync('index.html','dist/index.html');\" && tauri dev",
-    "build": "node -e \"const fs=require('fs');if(!fs.existsSync('dist'))fs.mkdirSync('dist');if(fs.existsSync('index.html'))fs.copyFileSync('index.html','dist/index.html');\" && tauri build",
-    "copy-ui": "node -e \"const fs=require('fs');if(!fs.existsSync('dist'))fs.mkdirSync('dist');fs.copyFileSync('index.html','dist/index.html');console.log('UI copied to dist/');""
+    "dev": "tauri dev",
+    "build": "tauri build"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
