@@ -1,0 +1,136 @@
+%3Aroot {
+  --bg%3A %230f172a%3B
+  --surface%3A %231e293b%3B
+  --text%3A %23f1f5f9%3B
+  --muted%3A %2394a3b8%3B
+  --primary%3A %233b82f6%3B
+  --danger%3A %23ef4444%3B
+  --success%3A %2322c55e%3B
+  --border%3A %23334155%3B
+}
+
+* {
+  box-sizing%3A border-box%3B
+  margin%3A 0%3B
+  padding%3A 0%3B
+}
+
+body {
+  font-family%3A system-ui%2C -apple-system%2C Segoe UI%2C Roboto%2C sans-serif%3B
+  background%3A var(--bg)%3B
+  color%3A var(--text)%3B
+  min-height%3A 100vh%3B
+}
+
+%23app {
+  display%3A flex%3B
+  flex-direction%3A column%3B
+  min-height%3A 100vh%3B
+}
+
+header {
+  background%3A var(--surface)%3B
+  border-bottom%3A 1px solid var(--border)%3B
+  padding%3A 0.75rem 1.5rem%3B
+  display%3A flex%3B
+  align-items%3A center%3B
+  justify-content%3A space-between%3B
+  gap%3A 1rem%3B
+}
+
+header h1 {
+  font-size%3A 1.25rem%3B
+  font-weight%3A 600%3B
+}
+
+nav {
+  display%3A flex%3B
+  gap%3A 0.5rem%3B
+}
+
+nav button {
+  background%3A transparent%3B
+  border%3A 1px solid var(--border)%3B
+  color%3A var(--text)%3B
+  padding%3A 0.4rem 0.9rem%3B
+  border-radius%3A 6px%3B
+  cursor%3A pointer%3B
+  font-size%3A 0.875rem%3B
+  transition%3A background 0.15s%2C border-color 0.15s%3B
+}
+
+nav button%3Ahover%2C
+nav button.active {
+  background%3A var(--primary)%3B
+  border-color%3A var(--primary)%3B
+}
+
+main {
+  flex%3A 1%3B
+  padding%3A 1.5rem%3B
+}
+
+.card {
+  background%3A var(--surface)%3B
+  border%3A 1px solid var(--border)%3B
+  border-radius%3A 8px%3B
+  padding%3A 1rem%3B
+  margin-bottom%3A 1rem%3B
+}
+
+.alert-danger {
+  border-left%3A 4px solid var(--danger)%3B
+}
+
+table {
+  width%3A 100%%3B
+  border-collapse%3A collapse%3B
+}
+
+th%2C td {
+  text-align%3A left%3B
+  padding%3A 0.5rem 0.75rem%3B
+  border-bottom%3A 1px solid var(--border)%3B
+}
+
+th {
+  color%3A var(--muted)%3B
+  font-weight%3A 500%3B
+  font-size%3A 0.8rem%3B
+}
+
+input%2C select%2C textarea {
+  background%3A var(--bg)%3B
+  border%3A 1px solid var(--border)%3B
+  color%3A var(--text)%3B
+  padding%3A 0.45rem 0.65rem%3B
+  border-radius%3A 6px%3B
+  font-size%3A 0.9rem%3B
+}
+
+input%3Afocus%2C select%3Afocus%2C textarea%3Afocus {
+  outline%3A none%3B
+  border-color%3A var(--primary)%3B
+}
+
+.btn {
+  background%3A var(--primary)%3B
+  color%3A white%3B
+  border%3A none%3B
+  padding%3A 0.45rem 1rem%3B
+  border-radius%3A 6px%3B
+  cursor%3A pointer%3B
+  font-size%3A 0.875rem%3B
+}
+
+.btn%3Ahover {
+  filter%3A brightness(1.1)%3B
+}
+
+.btn-danger {
+  background%3A var(--danger)%3B
+}
+
+.hidden {
+  display%3A none !important%3B
+}

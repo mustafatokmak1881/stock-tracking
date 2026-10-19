@@ -1,0 +1,14 @@
+{
+  "name"%3A "stock-tracking"%2C
+  "version"%3A "0.1.0"%2C
+  "description"%3A "Kapsamlı Stok Takip Yazılımı"%2C
+  "type"%3A "module"%2C
+  "scripts"%3A {
+    "tauri"%3A "tauri"%2C
+    "dev"%3A "tauri dev"%2C
+    "build"%3A "tauri build"
+  }%2C
+  "devDependencies"%3A {
+    "%40tauri-apps%2Fcli"%3A "^2"
+  }
+}
